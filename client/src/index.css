@@ -1,0 +1,172 @@
+:root {
+  --primary-color: #dc2626;
+  --primary-hover: #b91c1c;
+  --primary-light: #fef2f2;
+  --bg-layout: #fafafa;
+  --surface-color: #ffffff;
+  --border-color: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 25px -5px rgba(220, 38, 38, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] {
+  --primary-color: #ef4444;
+  --primary-hover: #dc2626;
+  --primary-light: #450a0a;
+  --bg-layout: #09090b;
+  --surface-color: #18181b;
+  --border-color: #27272a;
+  --text-main: #f8fafc;
+  --text-muted: #9ca3af;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: var(--bg-layout);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #71717a;
+  border-radius: 99px;
+}
+
+/* Touch Action Buttons for Mobile */
+.touch-action-btn {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+/* Bottom Navigation Bar for Mobile */
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: var(--surface-color);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  gap: 3px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: color 0.2s ease;
+}
+
+.mobile-nav-item.active {
+  color: var(--primary-color);
+}
+
+.mobile-nav-item .anticon {
+  font-size: 20px;
+}
+
+/* Dark mode Ant Design Overrides to fix card, modal, tabs, and input contrast */
+[data-theme='dark'] .ant-card {
+  background-color: #18181b !important;
+  border-color: #27272a !important;
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .ant-card-head {
+  border-bottom-color: #27272a !important;
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .ant-modal-content,
+[data-theme='dark'] .ant-modal-header {
+  background-color: #18181b !important;
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .ant-modal-title {
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .ant-tabs-nav {
+  background-color: transparent !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab {
+  color: #9ca3af !important;
+}
+
+[data-theme='dark'] .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #ef4444 !important;
+  font-weight: 700 !important;
+}
+
+[data-theme='dark'] .ant-input,
+[data-theme='dark'] .ant-input-affix-wrapper {
+  background-color: #18181b !important;
+  color: #f8fafc !important;
+  border-color: #27272a !important;
+}
+
+[data-theme='dark'] .ant-input::placeholder {
+  color: #71717a !important;
+}
+
+[data-theme='dark'] .ant-select-selector {
+  background-color: #18181b !important;
+  color: #f8fafc !important;
+  border-color: #27272a !important;
+}
+
+[data-theme='dark'] .ant-picker {
+  background-color: #18181b !important;
+  color: #f8fafc !important;
+  border-color: #27272a !important;
+}
+
+[data-theme='dark'] .ant-picker-input > input {
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .ant-empty-description {
+  color: #9ca3af !important;
+}

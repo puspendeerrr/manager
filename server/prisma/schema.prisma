@@ -1,0 +1,1352 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  SNOOZED
+  CANCELLED
+}
+
+enum ReminderInterval {
+  MINUTES_10
+  MINUTES_15
+  MINUTES_30
+  HOUR_1
+  HOURS_2
+  CUSTOM
+}
+
+enum ReminderState {
+  SCHEDULED
+  DUE
+  DELIVERED
+  ACKNOWLEDGED
+}
+
+enum DeadlineSource {
+  USER_PROVIDED
+  AI_SUGGESTED
+  SYSTEM_DEFAULT
+}
+
+enum VendorStatus {
+  RESEARCHED
+  CONTACT_PENDING
+  CONTACTED
+  REPLIED
+  QUOTATION_REQUESTED
+  QUOTATION_RECEIVED
+  SHORTLISTED
+  REJECTED
+  SELECTED
+}
+
+enum AutonomyMode {
+  MANUAL
+  ASSISTED
+  PROACTIVE
+}
+
+enum MemoryType {
+  USER_PREFERENCE
+  WORK_CONTEXT
+  PROJECT_CONTEXT
+  VENDOR_CONTEXT
+  TASK_CONTEXT
+  DECISION
+  FACT
+  ROUTINE
+}
+
+enum FollowUpStatus {
+  PENDING
+  DUE
+  COMPLETED
+  CANCELLED
+  WAITING
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  DISMISSED
+}
+
+enum GoalStatus {
+  ACTIVE
+  ON_TRACK
+  AT_RISK
+  BLOCKED
+  COMPLETED
+  CANCELLED
+}
+
+enum WorkStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  WAITING
+  BLOCKED
+  DONE
+  CANCELLED
+}
+
+enum WaitingStatus {
+  WAITING
+  RECEIVED
+  CANCELLED
+}
+
+enum RiskType {
+  DEADLINE_RISK
+  DEPENDENCY_RISK
+  VENDOR_RISK
+  FOLLOWUP_RISK
+  SCHEDULE_RISK
+  PROJECT_RISK
+}
+
+enum RiskSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ExecutionStatus {
+  PLANNED
+  READY
+  IN_PROGRESS
+  WAITING
+  BLOCKED
+  NEEDS_REVIEW
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ExecutionPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ExecutionSource {
+  USER
+  SONAM
+  WORKFLOW
+  AUTOMATION
+  EMAIL
+  CALENDAR
+  PROCUREMENT
+}
+
+enum ExecutionResultStatus {
+  SUCCESS
+  PARTIAL
+  FAILED
+  REQUIRES_REVIEW
+}
+
+enum EscalationLevel {
+  INFO
+  ATTENTION
+  WARNING
+  CRITICAL
+}
+
+enum ActionExecutionStatus {
+  DRAFT
+  PENDING_CONFIRMATION
+  APPROVED
+  QUEUED
+  EXECUTING
+  RETRY_PENDING
+  SUCCESS
+  FAILED
+  NEEDS_REVIEW
+  CANCELLED
+}
+
+enum CommunicationChannel {
+  GMAIL
+  WHATSAPP
+  TELEGRAM
+  SMS
+}
+
+enum CommunicationStatus {
+  DRAFT
+  QUEUED
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+  REPLIED
+}
+
+enum ResponseStatus {
+  UNPROCESSED
+  PROCESSING
+  PROCESSED
+  NEEDS_REVIEW
+  IGNORED
+}
+
+enum EvidenceType {
+  EMAIL
+  EMAIL_THREAD
+  DOCUMENT
+  URL
+  API_RESPONSE
+  SCREENSHOT
+  SYSTEM_RECORD
+}
+
+enum ApprovalType {
+  EXTERNAL_COMMUNICATION
+  DATA_MUTATION
+  WORKFLOW_ACTION
+}
+
+enum ActionRiskLevel {
+  SAFE
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AutomationStatus {
+  ENABLED
+  DISABLED
+  PAUSED
+}
+
+enum AutomationTriggerType {
+  TASK_OVERDUE
+  FOLLOWUP_DUE
+  VENDOR_REPLY_RECEIVED
+  QUOTATION_RECEIVED
+  EXECUTION_COMPLETED
+  EXECUTION_BLOCKED
+  SLA_WARNING
+  SLA_BREACHED
+  CALENDAR_CONFLICT
+  SCHEDULED_TIME
+}
+
+enum AutomationRunStatus {
+  QUEUED
+  RUNNING
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+enum SlaStatus {
+  HEALTHY
+  WARNING
+  BREACHED
+}
+
+enum AnomalyType {
+  DELAYED_RESPONSE
+  WORKLOAD_SPIKE
+  DEADLINE_SLIPPAGE
+  EXECUTION_FAILURE_RATE
+  APPROVAL_BOTTLENECK
+  STALLED_WORKFLOW
+}
+
+enum AnomalySeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum LearningType {
+  VENDOR_BEHAVIOR
+  WORKFLOW_BOTTLENECK
+  DURATION_ESTIMATION
+  USER_PREFERENCE
+  APPROVAL_PATTERN
+}
+
+enum AgentRunStatus {
+  RUNNING
+  COMPLETED
+  STOPPED_BUDGET_EXCEEDED
+  FAILED
+}
+
+enum ControlPlanePriority {
+  NORMAL
+  ELEVATED
+  HIGH
+  CRITICAL
+}
+
+enum ForecastType {
+  GOAL_COMPLETION
+  WORKLOAD
+  DEADLINE
+  VENDOR_RESPONSE
+  PROCUREMENT
+  PROJECT
+  SLA
+}
+
+enum ForecastConfidence {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TrendDirection {
+  IMPROVING
+  STABLE
+  DECLINING
+  VOLATILE
+  INSUFFICIENT_DATA
+}
+
+enum KpiStatus {
+  HEALTHY
+  WARNING
+  CRITICAL
+  INSUFFICIENT_DATA
+}
+
+enum MetricPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+}
+
+enum SimulationType {
+  WHAT_IF
+  CAPACITY
+  DEADLINE
+  VENDOR
+  WORKFLOW
+  GOAL
+}
+
+enum OptimizationType {
+  WORKLOAD
+  SCHEDULE
+  VENDOR
+  PROCUREMENT
+  WORKFLOW
+  FOLLOWUP
+  GOAL
+}
+
+enum VendorPerformanceStatus {
+  EXCELLENT
+  GOOD
+  AVERAGE
+  POOR
+  INSUFFICIENT_DATA
+}
+
+enum PredictionRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RecommendationType {
+  OPTIMIZE_WORKLOAD
+  CHANGE_PRIORITY
+  CHANGE_SCHEDULE
+  FOLLOWUP_VENDOR
+  CHANGE_VENDOR
+  ESCALATE_RISK
+  ACCELERATE_GOAL
+  CHANGE_WORKFLOW
+  REDUCE_BOTTLENECK
+}
+
+model User {
+  id                      String                  @id @default(uuid())
+  name                    String                  @default("Dev User")
+  email                   String                  @unique @default("user@example.com")
+  timezone                String                  @default("Asia/Kolkata")
+  workStartHour           String                  @default("09:00")
+  workEndHour             String                  @default("18:00")
+  defaultReminderInterval ReminderInterval        @default(MINUTES_30)
+  enableNotifications     Boolean                 @default(true)
+  enableSound             Boolean                 @default(true)
+  repeatReminderMins      Int                     @default(30)
+  keepReminding           Boolean                 @default(true)
+  autonomyMode            AutonomyMode            @default(ASSISTED)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  tasks                   Task[]
+  projects                Project[]
+  vendors                 Vendor[]
+  quotations              Quotation[]
+  googleAuthToken         GoogleAuthToken?
+  memories                WorkMemory[]
+  followUps               FollowUp[]
+  notifications           Notification[]
+  activityLogs            ActivityLog[]
+  goals                   Goal[]
+  workflows               Workflow[]
+  waitingFors             WaitingFor[]
+  risks                   Risk[]
+  decisions               Decision[]
+  executions              Execution[]
+  assignments             ExecutionAssignment[]
+  actionExecutions        ActionExecution[]
+  communicationMessages   CommunicationMessage[]
+  communicationResponses  CommunicationResponse[]
+  evidences               Evidence[]
+  approvalRequests        ApprovalRequest[]
+  actionAuditLogs         ActionAuditLog[]
+  automationRules         AutomationRule[]
+  automationRuns          AutomationRun[]
+  slaPolicies             SlaPolicy[]
+  operationalAnomalies    OperationalAnomaly[]
+  learningRecords         LearningRecord[]
+  agentRuns               AgentRun[]
+  controlPlaneSnapshots   ControlPlaneSnapshot[]
+  businessMetrics         BusinessMetric[]
+  kpiSnapshots            KpiSnapshot[]
+  forecasts               Forecast[]
+  forecastOutcomes        ForecastOutcome[]
+  vendorPerformances      VendorPerformance[]
+  bottlenecks             Bottleneck[]
+  whatIfScenarios         WhatIfScenario[]
+  optimizationProposals   OptimizationProposal[]
+  businessRecommendations BusinessRecommendation[]
+}
+
+model Project {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  color       String?     @default("#4f46e5")
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  tasks       Task[]
+  vendors     Vendor[]
+  quotations  Quotation[]
+  goals       Goal[]
+  workflows   Workflow[]
+
+  @@index([userId])
+}
+
+model Task {
+  id                  String            @id @default(uuid())
+  title               String
+  description         String?
+  status              TaskStatus        @default(PENDING)
+  priority            TaskPriority      @default(MEDIUM)
+  deadline            DateTime?
+  deadlineSource      DeadlineSource    @default(USER_PROVIDED)
+  reminderInterval    ReminderInterval?
+  nextReminderAt      DateTime?
+  lastRemindedAt      DateTime?
+  repeatReminderMins  Int?              @default(30)
+  keepReminding       Boolean           @default(true)
+  completedAt         DateTime?
+  projectId           String?
+  project             Project?          @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId              String
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminders           TaskReminder[]
+  followUps           FollowUp[]
+  waitingFors         WaitingFor[]
+  executions          Execution[]
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([deadline])
+  @@index([nextReminderAt])
+}
+
+model TaskReminder {
+  id           String        @id @default(uuid())
+  taskId       String
+  task         Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  scheduledFor DateTime
+  state        ReminderState @default(SCHEDULED)
+  deliveredAt  DateTime?
+  createdAt    DateTime      @default(now())
+
+  @@index([taskId])
+  @@index([scheduledFor, state])
+}
+
+model Vendor {
+  id                    String                 @id @default(uuid())
+  name                  String
+  website               String?
+  phone                 String?
+  email                 String?
+  address               String?
+  source                String?
+  sourceUrl             String?
+  notes                 String?
+  status                VendorStatus           @default(RESEARCHED)
+  projectId             String?
+  project               Project?               @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId                String
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quotations            Quotation[]
+  followUps             FollowUp[]
+  waitingFors           WaitingFor[]
+  communicationMessages CommunicationMessage[]
+  vendorPerformances    VendorPerformance[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Quotation {
+  id           String   @id @default(uuid())
+  vendorId     String
+  vendor       Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  projectId    String?
+  project      Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  unitPrice    Float?
+  quantity     Int?
+  moq          Int?
+  deliveryDays Int?
+  gst          Float?
+  notes        String?
+  source       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([vendorId])
+}
+
+model GoogleAuthToken {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken  String
+  refreshToken String
+  expiryDate   BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model WorkMemory {
+  id         String     @id @default(uuid())
+  userId     String
+  type       MemoryType @default(WORK_CONTEXT)
+  key        String
+  value      String
+  source     String?
+  confidence Float?     @default(1.0)
+  expiresAt  DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+}
+
+model FollowUp {
+  id            String         @id @default(uuid())
+  userId        String
+  vendorId      String?
+  taskId        String?
+  emailThreadId String?
+  title         String
+  reason        String?
+  dueAt         DateTime
+  status        FollowUpStatus @default(PENDING)
+  lastContactAt DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor        Vendor?        @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  task          Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([dueAt])
+}
+
+model Notification {
+  id          String             @id @default(uuid())
+  userId      String
+  type        String
+  priority    TaskPriority       @default(MEDIUM)
+  title       String
+  description String?
+  entityType  String?
+  entityId    String?
+  status      NotificationStatus @default(UNREAD)
+  expiresAt   DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String
+  entityType  String?
+  entityId    String?
+  description String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Goal {
+  id          String      @id @default(uuid())
+  userId      String
+  projectId   String?
+  title       String
+  description String?
+  targetDate  DateTime?
+  status      GoalStatus  @default(ACTIVE)
+  progress    Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project     Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  workflows   Workflow[]
+  executions  Execution[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([targetDate])
+}
+
+model Workflow {
+  id          String          @id @default(uuid())
+  userId      String
+  goalId      String?
+  projectId   String?
+  name        String
+  type        String          @default("CUSTOM")
+  status      WorkStatus      @default(NOT_STARTED)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal        Goal?           @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  project     Project?        @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  stages      WorkflowStage[]
+  waitingFors WaitingFor[]
+  executions  Execution[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model WorkflowStage {
+  id          String     @id @default(uuid())
+  workflowId  String
+  name        String
+  order       Int
+  status      WorkStatus @default(NOT_STARTED)
+  startedAt   DateTime?
+  completedAt DateTime?
+  metadata    Json?
+  workflow    Workflow   @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([workflowId])
+  @@index([order])
+}
+
+model WaitingFor {
+  id          String        @id @default(uuid())
+  userId      String
+  vendorId    String?
+  taskId      String?
+  workflowId  String?
+  title       String
+  description String?
+  expectedAt  DateTime?
+  status      WaitingStatus @default(WAITING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor      Vendor?       @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  task        Task?         @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  workflow    Workflow?     @relation(fields: [workflowId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([expectedAt])
+  @@index([vendorId])
+}
+
+model Risk {
+  id          String       @id @default(uuid())
+  userId      String
+  type        RiskType     @default(PROJECT_RISK)
+  severity    RiskSeverity @default(MEDIUM)
+  title       String
+  description String
+  entityType  String?
+  entityId    String?
+  mitigation  String?
+  status      String       @default("OPEN")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([severity])
+  @@index([status])
+}
+
+model Decision {
+  id                String   @id @default(uuid())
+  userId            String
+  title             String
+  decision          String
+  reasoning         String
+  context           String?
+  relatedEntityType String?
+  relatedEntityId   String?
+  createdAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Execution {
+  id               String                 @id @default(uuid())
+  userId           String
+  goalId           String?
+  workflowId       String?
+  taskId           String?
+  title            String
+  description      String?
+  status           ExecutionStatus        @default(PLANNED)
+  priority         ExecutionPriority      @default(MEDIUM)
+  source           ExecutionSource        @default(USER)
+  scheduledAt      DateTime?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  dueAt            DateTime?
+  resultStatus     ExecutionResultStatus?
+  resultSummary    String?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal             Goal?                  @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  workflow         Workflow?              @relation(fields: [workflowId], references: [id], onDelete: SetNull)
+  task             Task?                  @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  steps            ExecutionStep[]
+  attempts         ExecutionAttempt[]
+  dependencies     ExecutionDependency[]  @relation("ExecutionTarget")
+  dependents       ExecutionDependency[]  @relation("ExecutionSource")
+  assignments      ExecutionAssignment[]
+  actionExecutions ActionExecution[]
+  evidences        Evidence[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueAt])
+}
+
+model ExecutionStep {
+  id               String            @id @default(uuid())
+  executionId      String
+  title            String
+  description      String?
+  order            Int
+  status           ExecutionStatus   @default(PLANNED)
+  completedAt      DateTime?
+  result           Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  execution        Execution         @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  attempts         ExecutionAttempt[]
+  actionExecutions ActionExecution[]
+  evidences        Evidence[]
+
+  @@index([executionId])
+  @@index([order])
+}
+
+model ExecutionAttempt {
+  id          String          @id @default(uuid())
+  executionId String
+  stepId      String?
+  startedAt   DateTime        @default(now())
+  finishedAt  DateTime?
+  status      ExecutionStatus @default(IN_PROGRESS)
+  output      String?
+  error       String?
+
+  execution   Execution       @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  step        ExecutionStep?  @relation(fields: [stepId], references: [id], onDelete: SetNull)
+
+  @@index([executionId])
+}
+
+model ExecutionDependency {
+  id                   String    @id @default(uuid())
+  executionId          String
+  dependsOnExecutionId String
+  status               String    @default("ACTIVE")
+
+  execution            Execution @relation("ExecutionTarget", fields: [executionId], references: [id], onDelete: Cascade)
+  dependsOn            Execution @relation("ExecutionSource", fields: [dependsOnExecutionId], references: [id], onDelete: Cascade)
+
+  @@index([executionId])
+  @@index([dependsOnExecutionId])
+}
+
+model ExecutionAssignment {
+  id               String    @id @default(uuid())
+  executionId      String
+  assignedToUserId String
+  role             String    @default("OWNER")
+  status           String    @default("ASSIGNED")
+
+  execution        Execution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  user             User      @relation(fields: [assignedToUserId], references: [id], onDelete: Cascade)
+
+  @@index([executionId])
+  @@index([assignedToUserId])
+}
+
+model ActionExecution {
+  id              String                @id @default(uuid())
+  userId          String
+  executionId     String?
+  executionStepId String?
+  actionType      String
+  status          ActionExecutionStatus @default(PENDING_CONFIRMATION)
+  riskLevel       ActionRiskLevel       @default(HIGH)
+  idempotencyKey  String                @unique
+  provider        String                @default("GMAIL")
+  target          String?
+  payloadSnapshot Json
+  payloadHash     String
+  result          Json?
+  error           String?
+  attemptCount    Int                   @default(0)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  startedAt       DateTime?
+  completedAt     DateTime?
+
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  execution        Execution?           @relation(fields: [executionId], references: [id], onDelete: SetNull)
+  executionStep    ExecutionStep?       @relation(fields: [executionStepId], references: [id], onDelete: SetNull)
+  approvalRequests ApprovalRequest[]
+  auditLogs        ActionAuditLog[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([executionId])
+  @@index([executionStepId])
+}
+
+model CommunicationMessage {
+  id                String               @id @default(uuid())
+  userId            String
+  executionId       String?
+  vendorId          String?
+  channel           CommunicationChannel @default(GMAIL)
+  provider          String               @default("GMAIL")
+  providerMessageId String?
+  threadId          String?
+  direction         String               @default("OUTBOUND")
+  status            CommunicationStatus  @default(SENT)
+  sender            String
+  recipients        String
+  subject           String?
+  bodyPreview       String?
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  user      User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor    Vendor?                 @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  responses CommunicationResponse[]
+
+  @@index([userId])
+  @@index([channel])
+  @@index([threadId])
+  @@index([providerMessageId])
+}
+
+model CommunicationResponse {
+  id              String                @id @default(uuid())
+  userId          String
+  communicationId String?
+  threadId        String?
+  responseText    String
+  status          ResponseStatus        @default(UNPROCESSED)
+  rawReference    String?
+  extractedData   Json
+  confidence      Float                 @default(1.0)
+  receivedAt      DateTime              @default(now())
+  processedAt     DateTime?
+  createdAt       DateTime              @default(now())
+
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communication CommunicationMessage? @relation(fields: [communicationId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([threadId])
+  @@index([status])
+}
+
+model Evidence {
+  id              String       @id @default(uuid())
+  userId          String
+  executionId     String?
+  executionStepId String?
+  type            EvidenceType @default(EMAIL)
+  source          String
+  sourceId        String?
+  sourceUrl       String?
+  contentHash     String?
+  confidence      Float?       @default(1.0)
+  metadata        Json?
+  capturedAt      DateTime     @default(now())
+  createdAt       DateTime     @default(now())
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  execution     Execution?     @relation(fields: [executionId], references: [id], onDelete: SetNull)
+  executionStep ExecutionStep? @relation(fields: [executionStepId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([executionId])
+  @@index([executionStepId])
+}
+
+model ApprovalRequest {
+  id                String          @id @default(uuid())
+  userId            String
+  actionExecutionId String
+  approvalType      ApprovalType    @default(EXTERNAL_COMMUNICATION)
+  status            String          @default("PENDING")
+  payloadSnapshot   Json
+  payloadHash       String
+  target            String
+  expiresAt         DateTime
+  approvedAt        DateTime?
+  rejectedAt        DateTime?
+  approvedBy        String?
+  createdAt         DateTime        @default(now())
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actionExecution ActionExecution @relation(fields: [actionExecutionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([actionExecutionId])
+  @@index([status])
+  @@index([payloadHash])
+}
+
+model ActionAuditLog {
+  id                String   @id @default(uuid())
+  userId            String
+  actionExecutionId String?
+  who               String   @default("USER")
+  what              String
+  when              DateTime @default(now())
+  why               String
+  target            String?
+  input             Json?
+  result            Json?
+  status            String   @default("SUCCESS")
+  provider          String?  @default("GMAIL")
+  createdAt         DateTime @default(now())
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actionExecution ActionExecution? @relation(fields: [actionExecutionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([actionExecutionId])
+  @@index([createdAt])
+}
+
+model AutomationRule {
+  id               String                @id @default(uuid())
+  userId           String
+  name             String
+  description      String?
+  status           AutomationStatus      @default(ENABLED)
+  triggerType      AutomationTriggerType @default(TASK_OVERDUE)
+  triggerConfig    Json
+  actionConfig     Json
+  requiresApproval Boolean               @default(true)
+  cooldownMinutes  Int                   @default(60)
+  lastRunAt        DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  user User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runs AutomationRun[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([triggerType])
+}
+
+model AutomationRun {
+  id             String              @id @default(uuid())
+  userId         String
+  automationId   String
+  eventId        String?
+  status         AutomationRunStatus @default(QUEUED)
+  idempotencyKey String              @unique
+  result         Json?
+  error          String?
+  startedAt      DateTime            @default(now())
+  completedAt    DateTime?
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  automation AutomationRule @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([automationId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model SlaPolicy {
+  id                       String   @id @default(uuid())
+  userId                   String
+  name                     String
+  entityType               String   @default("VENDOR_RESPONSE")
+  durationMinutes          Int      @default(1440)
+  warningThresholdMinutes  Int      @default(1080)
+  criticalThresholdMinutes Int      @default(1440)
+  enabled                  Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([enabled])
+}
+
+model OperationalAnomaly {
+  id             String          @id @default(uuid())
+  userId         String
+  type           AnomalyType     @default(DELAYED_RESPONSE)
+  severity       AnomalySeverity @default(MEDIUM)
+  title          String
+  description    String
+  entityType     String?
+  entityId       String?
+  detectedAt     DateTime        @default(now())
+  acknowledgedAt DateTime?
+  resolvedAt     DateTime?
+  metadata       Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([severity])
+  @@index([type])
+  @@index([detectedAt])
+}
+
+model LearningRecord {
+  id              String       @id @default(uuid())
+  userId          String
+  type            LearningType @default(VENDOR_BEHAVIOR)
+  title           String
+  insight         String
+  source          String       @default("DETERMINISTIC_ANALYSIS")
+  confidence      Float        @default(1.0)
+  evidenceCount   Int          @default(1)
+  entityType      String?
+  entityId        String?
+  createdAt       DateTime     @default(now())
+  lastValidatedAt DateTime?    @default(now())
+  expiresAt       DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+}
+
+model AgentRun {
+  id              String         @id @default(uuid())
+  userId          String
+  trigger         String         @default("PERIODIC_WORKER")
+  status          AgentRunStatus @default(RUNNING)
+  startedAt       DateTime       @default(now())
+  completedAt     DateTime?
+  toolsUsed       Json
+  summary         String?
+  actionsProposed Int            @default(0)
+  actionsApproved Int            @default(0)
+  actionsExecuted Int            @default(0)
+  errors          Json?
+  budgetUsage     Json?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model ControlPlaneSnapshot {
+  id           String   @id @default(uuid())
+  userId       String
+  snapshotData Json
+  timestamp    DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([timestamp])
+}
+
+model BusinessMetric {
+  id                 String       @id @default(uuid())
+  userId             String
+  name               String
+  key                String
+  value              Float
+  unit               String?
+  period             MetricPeriod @default(DAILY)
+  source             String       @default("DETERMINISTIC_CALCULATION")
+  calculationVersion String       @default("1.0.0")
+  createdAt          DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([key])
+  @@index([period])
+  @@index([createdAt])
+}
+
+model KpiSnapshot {
+  id                String         @id @default(uuid())
+  userId            String
+  executionHealth   Float
+  deadlineHealth    Float
+  followUpHealth    Float
+  procurementHealth Float
+  workflowHealth    Float
+  goalHealth        Float
+  overallHealth     Float
+  status            KpiStatus      @default(HEALTHY)
+  trend             TrendDirection @default(STABLE)
+  calculatedAt      DateTime       @default(now())
+  explanation       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([calculatedAt])
+}
+
+model Forecast {
+  id                   String              @id @default(uuid())
+  userId               String
+  type                 ForecastType        @default(GOAL_COMPLETION)
+  targetEntityId       String?
+  targetDate           DateTime?
+  predictedDate        DateTime?
+  lowerBoundDate       DateTime?
+  upperBoundDate       DateTime?
+  confidence           ForecastConfidence  @default(MEDIUM)
+  confidenceScore      Float               @default(0.75)
+  riskLevel            PredictionRiskLevel @default(MEDIUM)
+  assumptions          Json
+  riskFactors          Json
+  dataPoints           Json
+  dataPointsUsed       Int                 @default(0)
+  historicalWindowDays Int                 @default(30)
+  calculationVersion   String              @default("1.0.0")
+  status               String              @default("VALID")
+  generatedAt          DateTime            @default(now())
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  forecastOutcomes ForecastOutcome[]
+
+  @@index([userId])
+  @@index([type])
+  @@index([generatedAt])
+}
+
+model ForecastOutcome {
+  id               String   @id @default(uuid())
+  userId           String
+  forecastId       String
+  predictedValue   String
+  actualValue      String
+  predictionError  Float
+  percentageError  Float?
+  outcomeDate      DateTime @default(now())
+  evaluationStatus String   @default("ACCURATE")
+  createdAt        DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  forecast Forecast @relation(fields: [forecastId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([forecastId])
+}
+
+model VendorPerformance {
+  id                            String                  @id @default(uuid())
+  userId                        String
+  vendorId                      String
+  vendorName                    String
+  responseTimeHours             Float                   @default(24.0)
+  quotationCount                Int                     @default(0)
+  averagePrice                  Float                   @default(0.0)
+  deliveryReliabilityPercent    Float                   @default(100.0)
+  followUpResponsivenessPercent Float                   @default(100.0)
+  completionRatePercent         Float                   @default(100.0)
+  riskScore                     Float                   @default(0.0)
+  performanceScore              Float                   @default(80.0)
+  status                        VendorPerformanceStatus @default(GOOD)
+  lastEvaluatedAt               DateTime                @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([vendorId])
+}
+
+model Bottleneck {
+  id                    String       @id @default(uuid())
+  userId                String
+  entityType            String
+  entityId              String?
+  bottleneckType        String
+  severity              RiskSeverity @default(MEDIUM)
+  title                 String
+  description           String
+  impactScore           Float        @default(50.0)
+  evidence              Json
+  suggestedIntervention String
+  detectedAt            DateTime     @default(now())
+  resolvedAt            DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([severity])
+  @@index([detectedAt])
+}
+
+model WhatIfScenario {
+  id             String         @id @default(uuid())
+  userId         String
+  simulationType SimulationType @default(WHAT_IF)
+  name           String
+  inputs         Json
+  assumptions    Json
+  baseline       Json
+  scenario       Json
+  result         Json
+  createdAt      DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model OptimizationProposal {
+  id               String           @id @default(uuid())
+  userId           String
+  type             OptimizationType @default(WORKLOAD)
+  targetEntityId   String?
+  title            String
+  currentState     String
+  proposedState    String
+  expectedImpact   Json
+  confidence       ForecastConfidence @default(MEDIUM)
+  reason           String
+  evidence         Json
+  approvalRequired Boolean          @default(true)
+  status           String           @default("PROPOSED")
+  createdAt        DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+}
+
+model BusinessRecommendation {
+  id               String              @id @default(uuid())
+  userId           String
+  recommendationType RecommendationType @default(OPTIMIZE_WORKLOAD)
+  priority         TaskPriority        @default(HIGH)
+  title            String
+  reason           String
+  evidence         Json
+  expectedImpact   String
+  risk             PredictionRiskLevel @default(LOW)
+  confidenceScore  Float               @default(0.85)
+  status           String              @default("OPEN")
+  actionType       String              @default("OPTIMIZE_WORKLOAD")
+  suggestedPayload Json?
+  createdAt        DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([priority])
+  @@index([status])
+}
