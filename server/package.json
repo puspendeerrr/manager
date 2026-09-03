@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc -p ../shared && prisma generate && tsc",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "prisma:generate": "prisma generate",
