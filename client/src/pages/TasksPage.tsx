@@ -10,6 +10,7 @@ import {
   CalendarOutlined,
   WarningOutlined,
   CheckCircleOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 import { taskService as taskClientService } from '../services/taskService';
 import { aiService as aiClientService } from '../services/aiService';
@@ -40,10 +41,12 @@ export const TasksPage: React.FC = () => {
   const [pendingCleanTitle, setPendingCleanTitle] = useState('');
   const [pendingSuggestedDate, setPendingSuggestedDate] = useState<string | null>(null);
   const [pendingSuggestedTime, setPendingSuggestedTime] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const fetchTasks = async () => {
     try {
       setLoading(true);
+      setErrorMsg(null);
       const list = await taskClientService.getTasks();
       setTasks(list);
 
@@ -61,7 +64,7 @@ export const TasksPage: React.FC = () => {
         setReminderModalOpen(true);
       }
     } catch (err: any) {
-      antMessage.error(err.message || 'Failed to load tasks');
+      setErrorMsg(err.message || 'Sonam server is waking up or unavailable. Please retry in a moment.');
     } finally {
       setLoading(false);
     }
@@ -331,6 +334,24 @@ export const TasksPage: React.FC = () => {
       {loading ? (
         <Card style={{ textAlign: 'center', padding: '40px 0', borderRadius: 16, background: isDark ? '#18181b' : '#ffffff' }}>
           <Spin size="large" tip="Loading your tasks & active reminders..." />
+        </Card>
+      ) : errorMsg && tasks.length === 0 ? (
+        <Card style={{ textAlign: 'center', padding: '40px 20px', borderRadius: 16, background: isDark ? '#18181b' : '#ffffff', border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}` }}>
+          <ClockCircleOutlined style={{ fontSize: 36, color: redPrimary, marginBottom: 12 }} />
+          <Title level={4} style={{ color: isDark ? '#f8fafc' : '#0f172a', margin: '0 0 8px 0' }}>
+            Sonam Server Status
+          </Title>
+          <Text type="secondary" style={{ display: 'block', marginBottom: 20, fontSize: 14 }}>
+            {errorMsg}
+          </Text>
+          <Button
+            type="primary"
+            icon={<ReloadOutlined />}
+            onClick={fetchTasks}
+            style={{ background: redPrimary, border: 'none', borderRadius: 8, fontWeight: 700 }}
+          >
+            Retry Connection
+          </Button>
         </Card>
       ) : (
         <>

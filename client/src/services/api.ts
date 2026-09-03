@@ -1,14 +1,24 @@
 import axios from 'axios';
 import { ApiResponse } from '@sonam/shared';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) return '/api';
+  
+  let clean = envUrl.trim().replace(/\/+$/, '');
+  if (clean.startsWith('http') && !clean.endsWith('/api')) {
+    clean = `${clean}/api`;
+  }
+  return clean;
+};
 
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
     'x-user-id': 'user_dev_01', // Default dev user
   },
+  timeout: 30000, // 30s timeout to allow Render free tier wake up
 });
 
 apiClient.interceptors.response.use(
@@ -24,8 +34,10 @@ apiClient.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    const message =
-      error.response?.data?.error?.message || error.message || 'An unexpected network error occurred';
+    let message = error.response?.data?.error?.message || error.message || 'An unexpected network error occurred';
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout') || error.response?.status === 502 || error.response?.status === 503) {
+      message = 'Sonam server is waking up (Render free instance). Please retry in a few seconds.';
+    }
     return Promise.reject(new Error(message));
   }
 );
