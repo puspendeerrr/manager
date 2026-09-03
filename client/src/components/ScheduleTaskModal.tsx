@@ -96,7 +96,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. QCSKT ke vendor final karna — tshirt"
+            placeholder="e.g. Call Aman regarding SIH..."
             size="large"
             style={{ borderRadius: 10 }}
           />

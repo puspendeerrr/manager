@@ -295,7 +295,7 @@ export const TasksPage: React.FC = () => {
         }}
       >
         <Input
-          placeholder="e.g. Aaj qcskt k vendor final krna h tshirt ka..."
+          placeholder="e.g. Call Aman regarding SIH..."
           variant="borderless"
           size="large"
           value={naturalInput}
