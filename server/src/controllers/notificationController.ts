@@ -14,6 +14,16 @@ export async function handleGetNotifications(req: Request, res: Response) {
   }
 }
 
+export async function handleSubscribePush(req: Request, res: Response) {
+  try {
+    const subscription = req.body;
+    const result = await notificationService.saveSubscription(DEFAULT_USER_ID, subscription);
+    return sendSuccess(res, result);
+  } catch (err: any) {
+    return sendError(res, err.message || 'Failed to subscribe to Web Push');
+  }
+}
+
 export async function handleMarkNotificationRead(req: Request, res: Response) {
   try {
     const { id } = req.params;

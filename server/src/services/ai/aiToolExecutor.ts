@@ -31,7 +31,7 @@ export class AIToolExecutor {
     switch (toolName) {
       case 'get_tasks': {
         const args = getTasksToolSchema.parse(rawArgs);
-        const tasks = await taskService.getTasks(userId, args);
+        const tasks = await taskService.getTasks(userId, args as any);
         return { toolName, result: { count: tasks.length, tasks } };
       }
 
@@ -64,7 +64,7 @@ export class AIToolExecutor {
       case 'update_task': {
         const args = updateTaskToolSchema.parse(rawArgs);
         const { taskId, ...updateData } = args;
-        const task = await taskService.updateTask(taskId, userId, updateData as any);
+        const task = await taskService.updateTask(taskId as string, userId, updateData as any);
         return { toolName, result: { message: `Task "${task.title}" updated!`, task } };
       }
 

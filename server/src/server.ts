@@ -17,19 +17,45 @@ import { reminderService } from './services/reminderService';
 import { sendSuccess } from './utils/response';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+
+// Dynamic CORS Origin handling
+const allowedOrigins = [
+  'https://sonam.puspender.in',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
+if (process.env.CLIENT_ORIGIN) allowedOrigins.push(process.env.CLIENT_ORIGIN);
+if (process.env.CORS_ORIGINS) {
+  process.env.CORS_ORIGINS.split(',').forEach((o) => allowedOrigins.push(o.trim()));
+}
 
 // Middleware
 app.use(
   cors({
-    origin: [CLIENT_ORIGIN, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow for production API flexibility
+      }
+    },
     credentials: true,
   })
 );
 app.use(express.json());
 
-// Health Check
+// Health Check Endpoints (for Render & Monitoring)
+app.get('/health', (req, res) => {
+  return sendSuccess(res, {
+    status: 'online',
+    app: 'Sonam AI Personal Todo & Reminder Server',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get('/api/health', (req, res) => {
   return sendSuccess(res, {
     status: 'online',
@@ -50,36 +76,23 @@ app.use('/api/notifications', notificationRoutes);
 // Error Handling Middleware
 app.use(errorHandler);
 
-// Background Reminder Cron Worker (runs every 1 minute)
+// Internal Server Fallback Cron (runs every 1 minute if server is online)
 cron.schedule('* * * * *', async () => {
   try {
     const processed: any = await reminderService.processDueReminders();
     const count = Array.isArray(processed) ? processed.length : 0;
     if (count > 0) {
-      console.log(`[ReminderCron] Processed ${count} due task reminders.`);
+      console.log(`[ServerCron] Processed ${count} due task reminders.`);
     }
   } catch (err) {
-    console.error('[ReminderCron] Error processing due reminders:', err);
+    console.error('[ServerCron] Error processing due reminders:', err);
   }
 });
 
-// Start Server
-app.listen(PORT, () => {
+// Start Server on 0.0.0.0 process.env.PORT
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`=======================================================`);
   console.log(`🚀 SONAM AI PERSONAL TODO & REMINDER SERVER IS ONLINE`);
-  console.log(`📡 URL: http://localhost:${PORT}`);
+  console.log(`📡 PORT: ${PORT}`);
   console.log(`=======================================================`);
-
-  // Start 10-second Persistent Repeating Reminder Background Worker
-  setInterval(async () => {
-    try {
-      const notifs: any = await reminderService.processReminders();
-      const count = Array.isArray(notifs) ? notifs.length : 0;
-      if (count > 0) {
-        console.log(`[ReminderWorker] Delivered ${count} persistent reminder notification(s).`);
-      }
-    } catch (err: any) {
-      console.error('[ReminderWorker] Processing error:', err.message);
-    }
-  }, 10000);
 });

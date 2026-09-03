@@ -15,7 +15,8 @@
     "prisma:generate": "npm run prisma:generate --workspace=server",
     "prisma:migrate": "npm run prisma:migrate --workspace=server",
     "prisma:db-push": "npm run prisma:db-push --workspace=server",
-    "prisma:seed": "npm run prisma:seed --workspace=server"
+    "prisma:seed": "npm run prisma:seed --workspace=server",
+    "cron:reminders": "npm run cron:reminders --workspace=server"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
