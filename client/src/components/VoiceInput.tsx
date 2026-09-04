@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Tag, Space, Tooltip, message as antMessage } from 'antd';
+import { App, Button, Tag, Space, Tooltip } from 'antd';
 import { AudioOutlined, AudioMutedOutlined, LoadingOutlined } from '@ant-design/icons';
 
 interface VoiceInputProps {
@@ -10,6 +10,7 @@ interface VoiceInputProps {
 export type VoiceState = 'IDLE' | 'LISTENING' | 'PROCESSING' | 'ERROR';
 
 export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled }) => {
+  const { message: antMessage } = App.useApp();
   const [state, setState] = useState<VoiceState>('IDLE');
   const [recognition, setRecognition] = useState<any>(null);
   const [isSupported, setIsSupported] = useState(true);

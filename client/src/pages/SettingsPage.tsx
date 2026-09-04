@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography, Card, Button, Divider, Radio, Select, Switch, message } from 'antd';
+import { App, Typography, Card, Button, Divider, Radio, Select, Switch } from 'antd';
 import {
   LogoutOutlined,
   UserOutlined,
@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 const { Title, Text } = Typography;
 
 export const SettingsPage: React.FC = () => {
+  const { message } = App.useApp();
   const { mode, setMode } = useTheme();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ export const SettingsPage: React.FC = () => {
         Configure visual theme and persistent repeating reminder behavior.
       </Text>
 
-      <Card style={{ borderRadius: 16, background: isDark ? '#18181b' : '#ffffff', borderColor: isDark ? '#27272a' : '#e2e8f0' }} bodyStyle={{ padding: '24px 28px' }}>
+      <Card style={{ borderRadius: 16, background: isDark ? '#18181b' : '#ffffff', borderColor: isDark ? '#27272a' : '#e2e8f0' }} styles={{ body: { padding: '24px 28px' } }}>
         {/* Account Information */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>

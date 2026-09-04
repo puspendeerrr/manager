@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Input, DatePicker, TimePicker, Select, Button, Typography, Form, message } from 'antd';
+import { App, Modal, Input, DatePicker, TimePicker, Select, Button, Typography, Form } from 'antd';
 import { CalendarOutlined, BellOutlined, CheckOutlined } from '@ant-design/icons';
 import { useTheme } from '../context/ThemeContext';
 import dayjs, { Dayjs } from 'dayjs';
@@ -25,6 +25,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
   onSave,
   onCancel,
 }) => {
+  const { message } = App.useApp();
   const { mode } = useTheme();
   const isDark = mode === 'dark';
   const redPrimary = isDark ? '#ef4444' : '#dc2626';
@@ -95,7 +96,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
       centered
       width={460}
       style={{ borderRadius: 16 }}
-      bodyStyle={{ padding: '20px 24px' }}
+      styles={{ body: { padding: '20px 24px' } }}
     >
       <Form layout="vertical" onFinish={handleFormSubmit} style={{ marginTop: 12 }}>
         {/* Task Title */}

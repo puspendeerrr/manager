@@ -85,7 +85,7 @@ export const SonamPage: React.FC = () => {
             borderColor: isDark ? '#27272a' : '#e2e8f0',
             boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.03)',
           }}
-          bodyStyle={{ padding: '20px' }}
+          styles={{ body: { padding: '20px' } }}
         >
           <AudioOutlined style={{ fontSize: 24, color: redPrimary, marginBottom: 10 }} />
           <Text style={{ fontWeight: 800, fontSize: 15, display: 'block', color: isDark ? '#f8fafc' : '#0f172a', marginBottom: 4 }}>
@@ -103,7 +103,7 @@ export const SonamPage: React.FC = () => {
             borderColor: isDark ? '#27272a' : '#e2e8f0',
             boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.03)',
           }}
-          bodyStyle={{ padding: '20px' }}
+          styles={{ body: { padding: '20px' } }}
         >
           <ThunderboltOutlined style={{ fontSize: 24, color: redPrimary, marginBottom: 10 }} />
           <Text style={{ fontWeight: 800, fontSize: 15, display: 'block', color: isDark ? '#f8fafc' : '#0f172a', marginBottom: 4 }}>
@@ -121,7 +121,7 @@ export const SonamPage: React.FC = () => {
             borderColor: isDark ? '#27272a' : '#e2e8f0',
             boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.03)',
           }}
-          bodyStyle={{ padding: '20px' }}
+          styles={{ body: { padding: '20px' } }}
         >
           <CheckSquareOutlined style={{ fontSize: 24, color: '#10b981', marginBottom: 10 }} />
           <Text style={{ fontWeight: 800, fontSize: 15, display: 'block', color: isDark ? '#f8fafc' : '#0f172a', marginBottom: 4 }}>

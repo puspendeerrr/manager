@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Typography, Calendar as AntCalendar, Card, Button, Modal, Tag, Space, Spin, message as antMessage } from 'antd';
+import { App, Typography, Calendar as AntCalendar, Card, Button, Modal, Tag, Space, Spin } from 'antd';
 import {
   CalendarOutlined,
   PlusOutlined,
@@ -22,6 +22,7 @@ import dayjs from 'dayjs';
 const { Title, Text } = Typography;
 
 export const Dashboard: React.FC = () => {
+  const { message: antMessage } = App.useApp();
   const navigate = useNavigate();
   const { mode } = useTheme();
   const isDark = mode === 'dark';
@@ -219,11 +220,11 @@ export const Dashboard: React.FC = () => {
           border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}`,
           marginBottom: 24,
         }}
-        bodyStyle={{ padding: isMobile ? '12px' : '20px' }}
+        styles={{ body: { padding: isMobile ? '12px' : '20px' } }}
       >
         {loading ? (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <Spin size="large" tip="Loading calendar..." />
+            <Spin size="large" />
           </div>
         ) : (
           <AntCalendar
@@ -267,7 +268,7 @@ export const Dashboard: React.FC = () => {
                 background: isDark ? '#18181b' : '#ffffff',
                 border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}`,
               }}
-              bodyStyle={{ padding: '16px 20px' }}
+              styles={{ body: { padding: '16px 20px' } }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>

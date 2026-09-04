@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Input, Button, Typography, message } from 'antd';
+import { App, Card, Input, Button, Typography } from 'antd';
 import { UserOutlined, LockOutlined, CheckSquareOutlined, LoginOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 const { Title, Text } = Typography;
 
 export const LoginPage: React.FC = () => {
+  const { message } = App.useApp();
   const navigate = useNavigate();
   const { login } = useAuth();
   const { mode } = useTheme();
@@ -56,7 +57,7 @@ export const LoginPage: React.FC = () => {
           borderColor: isDark ? '#27272a' : '#e2e8f0',
           boxShadow: isDark ? '0 10px 30px rgba(0,0,0,0.5)' : '0 10px 30px rgba(0,0,0,0.04)',
         }}
-        bodyStyle={{ padding: '36px 32px' }}
+        styles={{ body: { padding: '36px 32px' } }}
       >
         {/* Logo & Header */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>

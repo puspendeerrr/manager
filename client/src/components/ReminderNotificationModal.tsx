@@ -50,7 +50,7 @@ export const ReminderNotificationModal: React.FC<ReminderNotificationModalProps>
       centered
       width={460}
       style={{ borderRadius: 16 }}
-      bodyStyle={{ padding: '28px', textAlign: 'center' }}
+      styles={{ body: { padding: '28px', textAlign: 'center' } }}
     >
       <div
         style={{

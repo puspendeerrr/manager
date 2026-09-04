@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Tag, Button, Space, Typography, message as antMessage } from 'antd';
+import { App, Card, Tag, Button, Space, Typography } from 'antd';
 import {
   CheckOutlined,
   CloseOutlined,
@@ -21,6 +21,7 @@ interface ActionCardProps {
 }
 
 export const ActionCard: React.FC<ActionCardProps> = ({ action, onActionComplete }) => {
+  const { message: antMessage } = App.useApp();
   const { mode } = useTheme();
   const isDark = mode === 'dark';
   const redPrimary = isDark ? '#ef4444' : '#dc2626';

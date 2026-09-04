@@ -10,8 +10,10 @@ export class TaskService {
         update: {},
         create: {
           id: userId,
-          email: `${userId}@sonam.app`,
-          name: 'Sonam User',
+          username: userId,
+          usernameLower: userId.toLowerCase(),
+          email: `${userId}@manager.app`,
+          name: 'Personal User',
         },
       });
     } catch (err) {

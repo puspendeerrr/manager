@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Button, Card, Tag, Typography, Space, Spin, Modal, message as antMessage } from 'antd';
+import { App, Input, Button, Card, Tag, Typography, Space, Spin, Modal } from 'antd';
 import {
   SendOutlined,
   CheckOutlined,
@@ -23,6 +23,7 @@ import dayjs from 'dayjs';
 const { Title, Text } = Typography;
 
 export const TasksPage: React.FC = () => {
+  const { message: antMessage } = App.useApp();
   const { mode } = useTheme();
   const isDark = mode === 'dark';
   const redPrimary = isDark ? '#ef4444' : '#dc2626';
@@ -232,7 +233,7 @@ export const TasksPage: React.FC = () => {
         background: isDark ? '#18181b' : '#ffffff',
         boxShadow: isDark ? '0 2px 8px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.03)',
       }}
-      bodyStyle={{ padding: '16px 20px' }}
+      styles={{ body: { padding: '16px 20px' } }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
@@ -379,7 +380,7 @@ export const TasksPage: React.FC = () => {
       {/* Task Sections */}
       {loading ? (
         <Card style={{ textAlign: 'center', padding: '40px 0', borderRadius: 16, background: isDark ? '#18181b' : '#ffffff' }}>
-          <Spin size="large" tip="Loading your tasks & active reminders..." />
+          <Spin size="large" />
         </Card>
       ) : errorMsg && tasks.length === 0 ? (
         <Card style={{ textAlign: 'center', padding: '40px 20px', borderRadius: 16, background: isDark ? '#18181b' : '#ffffff', border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}` }}>
