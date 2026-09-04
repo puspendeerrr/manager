@@ -1,207 +1,312 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Typography, Tabs, Empty, Spin, message } from 'antd';
-import { SonamBanner } from '../components/SonamBanner';
-import { QuickTaskInput } from '../components/QuickTaskInput';
-import { StatsOverview } from '../components/StatsOverview';
-import { TaskCard } from '../components/TaskCard';
-import { statsService } from '../services/statsService';
+import { Typography, Calendar as AntCalendar, Card, Button, Modal, Tag, Space, Spin, message as antMessage } from 'antd';
+import {
+  CalendarOutlined,
+  PlusOutlined,
+  CheckOutlined,
+  ClockCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  FireOutlined,
+  WarningOutlined,
+  CheckCircleOutlined,
+} from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { taskService } from '../services/taskService';
-import { projectService } from '../services/projectService';
-import { SonamDashboardSummary, Project, SnoozeTaskDTO } from '@sonam/shared';
-import { FireOutlined, CalendarOutlined, WarningOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { Task, TaskStatus } from '@sonam/shared';
 import { useTheme } from '../context/ThemeContext';
+import { ScheduleTaskModal } from '../components/ScheduleTaskModal';
+import { ReminderNotificationModal } from '../components/ReminderNotificationModal';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 
 export const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { mode } = useTheme();
   const isDark = mode === 'dark';
   const redPrimary = isDark ? '#ef4444' : '#dc2626';
 
-  const [summary, setSummary] = useState<SonamDashboardSummary | null>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  // Edit / Snooze modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [snoozeModalOpen, setSnoozeModalOpen] = useState(false);
+
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
-      const [sumData, projData] = await Promise.all([
-        statsService.getDashboardSummary(),
-        projectService.getProjects(),
-      ]);
-      setSummary(sumData);
-      setProjects(projData);
+      const list = await taskService.getTasks();
+      setTasks(list);
     } catch (err: any) {
-      message.error(err.message || 'Failed to load dashboard data');
+      antMessage.error(err.message || 'Failed to load scheduled tasks');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleCreateTask = async (taskData: any) => {
-    await taskService.createTask(taskData);
-    await fetchData();
-  };
+    fetchTasks();
+  }, [fetchTasks]);
 
   const handleComplete = async (taskId: string) => {
-    await taskService.completeTask(taskId);
-    message.success('Task marked completed!');
-    await fetchData();
-  };
-
-  const handleSnooze = async (taskId: string, dto: SnoozeTaskDTO) => {
-    await taskService.snoozeTask(taskId, dto);
-    message.info('Task reminder snoozed');
-    await fetchData();
-  };
-
-  const handleReschedule = async (taskId: string, newDeadline: string) => {
-    await taskService.rescheduleTask(taskId, { newDeadline });
-    message.success('Task deadline updated');
-    await fetchData();
+    try {
+      await taskService.completeTask(taskId);
+      antMessage.success('Task marked completed!');
+      setDetailModalOpen(false);
+      fetchTasks();
+    } catch (err: any) {
+      antMessage.error(err.message || 'Failed to complete task');
+    }
   };
 
   const handleDelete = async (taskId: string) => {
-    await taskService.deleteTask(taskId);
-    message.success('Task deleted');
-    await fetchData();
+    try {
+      await taskService.deleteTask(taskId);
+      antMessage.success('Task deleted');
+      setDetailModalOpen(false);
+      fetchTasks();
+    } catch (err: any) {
+      antMessage.error(err.message || 'Failed to delete task');
+    }
   };
 
-  if (loading && !summary) {
+  const handleSaveEdit = async (data: { title: string; deadlineIso: string; repeatMins: number }) => {
+    if (!selectedTask) return;
+    try {
+      await taskService.updateTask(selectedTask.id, {
+        title: data.title,
+        deadline: data.deadlineIso,
+        nextReminderAt: data.deadlineIso,
+        repeatReminderMins: data.repeatMins,
+      });
+      antMessage.success('Task updated!');
+      setEditModalOpen(false);
+      setDetailModalOpen(false);
+      fetchTasks();
+    } catch (err: any) {
+      antMessage.error(err.message || 'Failed to update task');
+    }
+  };
+
+  const dateCellRender = (value: dayjs.Dayjs) => {
+    const dateStr = value.format('YYYY-MM-DD');
+    const dayTasks = tasks.filter(
+      (t) => t.deadline && dayjs(t.deadline).format('YYYY-MM-DD') === dateStr
+    );
+
+    if (dayTasks.length === 0) return null;
+
     return (
-      <div style={{ textAlign: 'center', padding: '60px 0' }}>
-        <Spin size="large" tip="Sonam is organizing your schedule..." />
+      <div style={{ marginTop: 4 }}>
+        {dayTasks.slice(0, 3).map((t) => (
+          <div
+            key={t.id}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedTask(t);
+              setDetailModalOpen(true);
+            }}
+            style={{
+              background: t.status === TaskStatus.COMPLETED ? (isDark ? '#064e3b' : '#ecfdf5') : (isDark ? '#7f1d1d' : '#fef2f2'),
+              color: t.status === TaskStatus.COMPLETED ? (isDark ? '#34d399' : '#059669') : redPrimary,
+              border: `1px solid ${t.status === TaskStatus.COMPLETED ? '#10b981' : redPrimary}`,
+              borderRadius: 6,
+              padding: '2px 6px',
+              fontSize: 11,
+              fontWeight: 600,
+              marginBottom: 3,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              cursor: 'pointer',
+            }}
+          >
+            {t.status === TaskStatus.COMPLETED ? '✓ ' : '📌 '}{t.title}
+          </div>
+        ))}
+        {dayTasks.length > 3 && (
+          <Text style={{ fontSize: 10, color: isDark ? '#9ca3af' : '#64748b', fontWeight: 700 }}>
+            +{dayTasks.length - 3} more
+          </Text>
+        )}
       </div>
     );
-  }
-
-  const { doNowTasks = [], upcomingTasks = [], overdueTasks = [], recentlyCompletedTasks = [], stats } =
-    summary || {
-      stats: { todayCount: 0, completedCount: 0, pendingCount: 0, overdueCount: 0, urgentCount: 0 },
-    };
-
-  const tabItems = [
-    {
-      key: 'donow',
-      label: (
-        <span>
-          <FireOutlined style={{ color: redPrimary, marginRight: 6 }} /> Do Now <span style={{ fontWeight: 700 }}>({doNowTasks.length})</span>
-        </span>
-      ),
-      children:
-        doNowTasks.length > 0 ? (
-          doNowTasks.map((t) => (
-            <TaskCard
-              key={t.id}
-              task={t}
-              onComplete={handleComplete}
-              onSnooze={handleSnooze}
-              onReschedule={handleReschedule}
-              onDelete={handleDelete}
-            />
-          ))
-        ) : (
-          <Empty description="No urgent tasks right now. Great job!" style={{ padding: '30px 0' }} />
-        ),
-    },
-    {
-      key: 'upcoming',
-      label: (
-        <span>
-          <CalendarOutlined style={{ color: redPrimary, marginRight: 6 }} /> Upcoming <span style={{ fontWeight: 700 }}>({upcomingTasks.length})</span>
-        </span>
-      ),
-      children:
-        upcomingTasks.length > 0 ? (
-          upcomingTasks.map((t) => (
-            <TaskCard
-              key={t.id}
-              task={t}
-              onComplete={handleComplete}
-              onSnooze={handleSnooze}
-              onReschedule={handleReschedule}
-              onDelete={handleDelete}
-            />
-          ))
-        ) : (
-          <Empty description="No upcoming tasks." style={{ padding: '30px 0' }} />
-        ),
-    },
-    {
-      key: 'overdue',
-      label: (
-        <span>
-          <WarningOutlined style={{ color: '#dc2626', marginRight: 6 }} /> Overdue <span style={{ fontWeight: 700, color: overdueTasks.length > 0 ? '#ef4444' : 'inherit' }}>({overdueTasks.length})</span>
-        </span>
-      ),
-      children:
-        overdueTasks.length > 0 ? (
-          overdueTasks.map((t) => (
-            <TaskCard
-              key={t.id}
-              task={t}
-              onComplete={handleComplete}
-              onSnooze={handleSnooze}
-              onReschedule={handleReschedule}
-              onDelete={handleDelete}
-            />
-          ))
-        ) : (
-          <Empty description="No overdue tasks. All caught up!" style={{ padding: '30px 0' }} />
-        ),
-    },
-    {
-      key: 'completed',
-      label: (
-        <span>
-          <CheckCircleOutlined style={{ color: '#10b981', marginRight: 6 }} /> Completed <span style={{ fontWeight: 700 }}>({recentlyCompletedTasks.length})</span>
-        </span>
-      ),
-      children:
-        recentlyCompletedTasks.length > 0 ? (
-          recentlyCompletedTasks.map((t) => (
-            <TaskCard
-              key={t.id}
-              task={t}
-              onComplete={handleComplete}
-              onSnooze={handleSnooze}
-              onReschedule={handleReschedule}
-              onDelete={handleDelete}
-            />
-          ))
-        ) : (
-          <Empty description="No completed tasks yet." style={{ padding: '30px 0' }} />
-        ),
-    },
-  ];
+  };
 
   return (
     <div>
-      {/* Header Sonam Banner */}
-      <SonamBanner summary={summary} loading={loading} />
-
-      {/* Prominent Quick Task Input */}
-      <QuickTaskInput projects={projects} onTaskCreated={handleCreateTask} />
-
-      {/* KPI Counters */}
-      <StatsOverview stats={stats} />
-
-      {/* Segmented Task Dashboard */}
-      <div
+      {/* Top Calendar Header Banner */}
+      <Card
         style={{
           background: isDark ? '#18181b' : '#ffffff',
           borderRadius: 16,
-          padding: '20px 24px',
+          marginBottom: 24,
           border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}`,
-          boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.4)' : '0 2px 10px rgba(0,0,0,0.02)',
         }}
       >
-        <Tabs defaultActiveKey="donow" items={tabItems} size="large" />
-      </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <Title level={3} style={{ color: isDark ? '#f8fafc' : '#0f172a', margin: 0, fontWeight: 800 }}>
+              <CalendarOutlined style={{ color: redPrimary, marginRight: 10 }} />
+              Task Calendar
+            </Title>
+            <Text type="secondary" style={{ fontSize: 14 }}>
+              View-only schedule of your personal todo tasks & persistent reminders.
+            </Text>
+          </div>
+
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            size="large"
+            onClick={() => navigate('/tasks')}
+            style={{
+              background: redPrimary,
+              border: 'none',
+              borderRadius: 10,
+              fontWeight: 700,
+            }}
+          >
+            Go to Tasks to Add Task
+          </Button>
+        </div>
+      </Card>
+
+      {/* Calendar Grid View */}
+      <Card
+        style={{
+          background: isDark ? '#18181b' : '#ffffff',
+          borderRadius: 16,
+          border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}`,
+        }}
+      >
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <Spin size="large" tip="Loading calendar tasks..." />
+          </div>
+        ) : (
+          <AntCalendar cellRender={dateCellRender} />
+        )}
+      </Card>
+
+      {/* Task Details Modal */}
+      {selectedTask && (
+        <Modal
+          open={detailModalOpen}
+          onCancel={() => setDetailModalOpen(false)}
+          footer={null}
+          title={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontWeight: 800, fontSize: 18, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                {selectedTask.title}
+              </span>
+            </div>
+          }
+          style={{ borderRadius: 16 }}
+        >
+          <div style={{ padding: '12px 0' }}>
+            <p>
+              <Text type="secondary">Scheduled Date & Time:</Text>{' '}
+              <Text style={{ fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' }}>
+                {selectedTask.deadline ? dayjs(selectedTask.deadline).format('MMMM D, YYYY · h:mm A') : 'No date set'}
+              </Text>
+            </p>
+            <p>
+              <Text type="secondary">Repeating Reminder:</Text>{' '}
+              <Tag color="red" style={{ fontWeight: 700 }}>
+                Every {selectedTask.repeatReminderMins || 30} mins
+              </Tag>
+            </p>
+            <p>
+              <Text type="secondary">Status:</Text>{' '}
+              <Tag color={selectedTask.status === TaskStatus.COMPLETED ? 'green' : 'gold'} style={{ fontWeight: 700 }}>
+                {selectedTask.status}
+              </Tag>
+            </p>
+
+            <div style={{ marginTop: 24, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {selectedTask.status !== TaskStatus.COMPLETED && (
+                <Button
+                  type="primary"
+                  icon={<CheckOutlined />}
+                  onClick={() => handleComplete(selectedTask.id)}
+                  style={{ background: '#10b981', border: 'none', borderRadius: 8, fontWeight: 700 }}
+                >
+                  Done
+                </Button>
+              )}
+              {selectedTask.status !== TaskStatus.COMPLETED && (
+                <Button
+                  icon={<ClockCircleOutlined />}
+                  onClick={() => setSnoozeModalOpen(true)}
+                  style={{ borderRadius: 8, fontWeight: 700 }}
+                >
+                  Snooze
+                </Button>
+              )}
+              <Button
+                icon={<EditOutlined />}
+                onClick={() => setEditModalOpen(true)}
+                style={{ borderRadius: 8, fontWeight: 700 }}
+              >
+                Edit
+              </Button>
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                onClick={() => handleDelete(selectedTask.id)}
+                style={{ borderRadius: 8, fontWeight: 700 }}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Schedule Modal */}
+      {selectedTask && (
+        <ScheduleTaskModal
+          open={editModalOpen}
+          initialTitle={selectedTask.title}
+          initialDateStr={selectedTask.deadline ? dayjs(selectedTask.deadline).format('YYYY-MM-DD') : null}
+          initialTimeStr={selectedTask.deadline ? dayjs(selectedTask.deadline).format('HH:mm') : null}
+          initialRepeatMins={selectedTask.repeatReminderMins || 30}
+          onCancel={() => setEditModalOpen(false)}
+          onSave={handleSaveEdit}
+        />
+      )}
+
+      {/* Snooze Modal */}
+      {selectedTask && (
+        <ReminderNotificationModal
+          open={snoozeModalOpen}
+          task={selectedTask}
+          onClose={() => setSnoozeModalOpen(false)}
+          onComplete={async () => {
+            await handleComplete(selectedTask.id);
+            setSnoozeModalOpen(false);
+          }}
+          onSnooze={async (mins) => {
+            await taskService.snoozeTask(selectedTask.id, { snoozeMinutes: mins });
+            antMessage.info(`Task snoozed for ${mins} minutes`);
+            setSnoozeModalOpen(false);
+            setDetailModalOpen(false);
+            fetchTasks();
+          }}
+          onStopReminders={async () => {
+            await taskService.updateTask(selectedTask.id, { keepReminding: false });
+            antMessage.info('Reminders stopped for this task');
+            setSnoozeModalOpen(false);
+            setDetailModalOpen(false);
+            fetchTasks();
+          }}
+        />
+      )}
     </div>
   );
 };
