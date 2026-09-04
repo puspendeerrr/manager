@@ -34,7 +34,14 @@ export const authService = {
   },
 
   async getMe() {
-    const res: any = await apiClient.get('/auth/me');
-    return res.user as User;
+    const token = localStorage.getItem('sonam_auth_token');
+    if (!token) return null;
+    try {
+      const res: any = await apiClient.get('/auth/me');
+      return (res?.user || res) as User;
+    } catch (err) {
+      localStorage.removeItem('sonam_auth_token');
+      return null;
+    }
   },
 };
