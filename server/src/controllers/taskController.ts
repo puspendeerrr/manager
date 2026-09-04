@@ -1,12 +1,20 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { taskService } from '../services/taskService';
 import { sendSuccess, sendError } from '../utils/response';
+import { AuthenticatedRequest } from '../middleware/authMiddleware';
 
-const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID || 'user_dev_01';
+function getUserId(req: AuthenticatedRequest): string {
+  if (req.user && req.user.id) {
+    return req.user.id;
+  }
+  const headerId = req.headers['x-user-id'] as string;
+  if (headerId) return headerId;
+  return 'user_dev_01';
+}
 
-export async function getTasks(req: Request, res: Response, next: NextFunction) {
+export async function getTasks(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
+    const userId = getUserId(req);
     const { status, priority, projectId, search } = req.query;
 
     const tasks = await taskService.getTasks(userId, {
@@ -22,14 +30,14 @@ export async function getTasks(req: Request, res: Response, next: NextFunction) 
   }
 }
 
-export async function getTaskById(req: Request, res: Response, next: NextFunction) {
+export async function getTaskById(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
+    const userId = getUserId(req);
     const { id } = req.params;
 
     const task = await taskService.getTaskById(id, userId);
     if (!task) {
-      return sendError(res, 'Task not found', 404, 'NOT_FOUND');
+      return sendError(res, 'Task not found or access denied', 404, 'NOT_FOUND');
     }
 
     return sendSuccess(res, task);
@@ -38,9 +46,9 @@ export async function getTaskById(req: Request, res: Response, next: NextFunctio
   }
 }
 
-export async function createTask(req: Request, res: Response, next: NextFunction) {
+export async function createTask(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
+    const userId = getUserId(req);
     const task = await taskService.createTask(userId, req.body);
     return sendSuccess(res, task, 201);
   } catch (err) {
@@ -48,9 +56,9 @@ export async function createTask(req: Request, res: Response, next: NextFunction
   }
 }
 
-export async function updateTask(req: Request, res: Response, next: NextFunction) {
+export async function updateTask(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
+    const userId = getUserId(req);
     const { id } = req.params;
 
     const task = await taskService.updateTask(id, userId, req.body);
@@ -60,9 +68,9 @@ export async function updateTask(req: Request, res: Response, next: NextFunction
   }
 }
 
-export async function deleteTask(req: Request, res: Response, next: NextFunction) {
+export async function deleteTask(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
+    const userId = getUserId(req);
     const { id } = req.params;
 
     await taskService.deleteTask(id, userId);
@@ -72,9 +80,9 @@ export async function deleteTask(req: Request, res: Response, next: NextFunction
   }
 }
 
-export async function completeTask(req: Request, res: Response, next: NextFunction) {
+export async function completeTask(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
+    const userId = getUserId(req);
     const { id } = req.params;
 
     const task = await taskService.completeTask(id, userId);
@@ -84,9 +92,9 @@ export async function completeTask(req: Request, res: Response, next: NextFuncti
   }
 }
 
-export async function snoozeTask(req: Request, res: Response, next: NextFunction) {
+export async function snoozeTask(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
+    const userId = getUserId(req);
     const { id } = req.params;
 
     const task = await taskService.snoozeTask(id, userId, req.body);
@@ -96,9 +104,9 @@ export async function snoozeTask(req: Request, res: Response, next: NextFunction
   }
 }
 
-export async function rescheduleTask(req: Request, res: Response, next: NextFunction) {
+export async function rescheduleTask(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
-    const userId = (req.headers['x-user-id'] as string) || DEFAULT_USER_ID;
+    const userId = getUserId(req);
     const { id } = req.params;
 
     const task = await taskService.rescheduleTask(id, userId, req.body);

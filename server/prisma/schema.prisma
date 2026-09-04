@@ -391,8 +391,11 @@ enum RecommendationType {
 
 model User {
   id                      String                  @id @default(uuid())
-  name                    String                  @default("Dev User")
-  email                   String                  @unique @default("user@example.com")
+  username                String?                 @unique
+  usernameLower           String?                 @unique
+  passwordHash            String?
+  name                    String                  @default("Sonam User")
+  email                   String?
   timezone                String                  @default("Asia/Kolkata")
   workStartHour           String                  @default("09:00")
   workEndHour             String                  @default("18:00")

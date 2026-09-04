@@ -10,6 +10,7 @@ import {
   rescheduleTask,
 } from '../controllers/taskController';
 import { validateRequest } from '../middleware/validateRequest';
+import { requireAuth } from '../middleware/authMiddleware';
 import {
   createTaskSchema,
   updateTaskSchema,
@@ -18,6 +19,9 @@ import {
 } from '../validators/schemas';
 
 const router = Router();
+
+// Require Authentication for all task operations
+router.use(requireAuth);
 
 router.get('/', getTasks);
 router.get('/:id', getTaskById);

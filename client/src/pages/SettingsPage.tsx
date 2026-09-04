@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
-import { Card, Typography, Switch, Select, Button, message, Divider, Radio } from 'antd';
-import { BellOutlined, SoundOutlined, ClockCircleOutlined, SaveOutlined, GlobalOutlined, BgColorsOutlined } from '@ant-design/icons';
-import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
 export const SettingsPage: React.FC = () => {
   const { mode, setMode } = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
   const isDark = mode === 'dark';
   const redPrimary = isDark ? '#ef4444' : '#dc2626';
 
@@ -14,6 +16,12 @@ export const SettingsPage: React.FC = () => {
   const [enableSound, setEnableSound] = useState(true);
   const [keepReminding, setKeepReminding] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    message.success('Logged out successfully');
+    navigate('/login');
+  };
 
   const handleSave = () => {
     setSaving(true);
@@ -46,6 +54,24 @@ export const SettingsPage: React.FC = () => {
       </Text>
 
       <Card style={{ borderRadius: 16, background: isDark ? '#18181b' : '#ffffff', borderColor: isDark ? '#27272a' : '#e2e8f0' }} bodyStyle={{ padding: '24px 28px' }}>
+        {/* Account Information */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <div>
+            <Text style={{ fontWeight: 700, fontSize: 16, color: isDark ? '#f8fafc' : '#0f172a', display: 'block' }}>
+              <UserOutlined style={{ marginRight: 8, color: redPrimary }} /> Logged in as: <span style={{ color: redPrimary }}>@{user?.username || 'user'}</span>
+            </Text>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              Your tasks and persistent reminders are securely isolated to your account.
+            </Text>
+          </div>
+
+          <Button danger icon={<LogoutOutlined />} onClick={handleLogout} style={{ borderRadius: 8, fontWeight: 700 }}>
+            Logout
+          </Button>
+        </div>
+
+        <Divider style={{ borderColor: isDark ? '#27272a' : '#f1f5f9' }} />
+
         {/* Visual Theme Selection */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>

@@ -16,9 +16,17 @@ export const apiClient = axios.create({
   baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
-    'x-user-id': 'user_dev_01', // Default dev user
   },
+  withCredentials: true,
   timeout: 30000, // 30s timeout to allow Render free tier wake up
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('sonam_auth_token');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 apiClient.interceptors.response.use(

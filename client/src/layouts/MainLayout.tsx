@@ -45,6 +45,26 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { key: '/settings', icon: <SettingOutlined style={{ color: isDark ? '#9ca3af' : '#64748b', fontSize: 18 }} />, label: 'Settings' },
   ];
 
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
+  if (isAuthPage) {
+    return (
+      <Layout style={{ minHeight: '100vh', background: bgLayout }}>
+        <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 100 }}>
+          <Tooltip title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}>
+            <Button
+              type="text"
+              icon={isDark ? <SunOutlined style={{ color: '#f59e0b', fontSize: 20 }} /> : <MoonOutlined style={{ color: '#64748b', fontSize: 20 }} />}
+              onClick={toggleMode}
+              style={{ borderRadius: 8 }}
+            />
+          </Tooltip>
+        </div>
+        <Content style={{ width: '100%', margin: '0 auto' }}>{children}</Content>
+      </Layout>
+    );
+  }
+
   return (
     <Layout style={{ minHeight: '100vh', background: bgLayout }}>
       {/* Desktop Sider */}

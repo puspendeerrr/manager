@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
 
 dotenv.config();
 
+import authRoutes from './routes/authRoutes';
 import taskRoutes from './routes/taskRoutes';
 import projectRoutes from './routes/projectRoutes';
 import statsRoutes from './routes/statsRoutes';
@@ -46,6 +48,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 
 // Health Check Endpoints (for Render & Monitoring)
 app.get('/health', (req, res) => {
@@ -65,6 +68,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Core Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/stats', statsRoutes);
