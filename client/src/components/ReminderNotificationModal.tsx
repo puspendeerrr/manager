@@ -82,7 +82,7 @@ export const ReminderNotificationModal: React.FC<ReminderNotificationModalProps>
         This task is due. Sonam will keep reminding you every 30 mins until completed.
       </Text>
 
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 20 }}>
         <Button
           type="primary"
           icon={<CheckOutlined />}
@@ -93,7 +93,7 @@ export const ReminderNotificationModal: React.FC<ReminderNotificationModalProps>
             background: '#10b981',
             borderColor: '#10b981',
             fontWeight: 800,
-            borderRadius: 10,
+            borderRadius: 12,
             height: 48,
             fontSize: 16,
           }}
@@ -101,12 +101,12 @@ export const ReminderNotificationModal: React.FC<ReminderNotificationModalProps>
           Done (Complete & Stop Reminders)
         </Button>
 
-        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 8 }}>
           <Button
             icon={<ClockCircleOutlined />}
             size="middle"
             onClick={() => onSnooze(task.id, 10)}
-            style={{ borderRadius: 8, fontWeight: 700, borderColor: redPrimary, color: redPrimary }}
+            style={{ borderRadius: 10, fontWeight: 700, borderColor: redPrimary, color: redPrimary }}
           >
             Snooze 10m
           </Button>
@@ -115,7 +115,7 @@ export const ReminderNotificationModal: React.FC<ReminderNotificationModalProps>
             icon={<ClockCircleOutlined />}
             size="middle"
             onClick={() => onSnooze(task.id, 30)}
-            style={{ borderRadius: 8, fontWeight: 700, borderColor: redPrimary, color: redPrimary }}
+            style={{ borderRadius: 10, fontWeight: 700, borderColor: redPrimary, color: redPrimary }}
           >
             Snooze 30m
           </Button>
@@ -124,12 +124,12 @@ export const ReminderNotificationModal: React.FC<ReminderNotificationModalProps>
             icon={<BellFilled />}
             size="middle"
             onClick={() => onStopReminders(task.id)}
-            style={{ borderRadius: 8, fontWeight: 700, color: isDark ? '#9ca3af' : '#64748b' }}
+            style={{ borderRadius: 10, fontWeight: 700, color: isDark ? '#9ca3af' : '#64748b' }}
           >
             Stop Reminders
           </Button>
-        </Space>
-      </Space>
+        </div>
+      </div>
     </Modal>
   );
 };

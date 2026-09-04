@@ -334,7 +334,7 @@ export const Dashboard: React.FC = () => {
       {/* Task Details Modal */}
       {selectedTask && (
         <Modal
-          open={detailModalOpen}
+          open={detailModalOpen && !editModalOpen && !snoozeModalOpen}
           onCancel={() => setDetailModalOpen(false)}
           footer={null}
           title={
@@ -380,7 +380,10 @@ export const Dashboard: React.FC = () => {
               {selectedTask.status !== TaskStatus.COMPLETED && (
                 <Button
                   icon={<ClockCircleOutlined />}
-                  onClick={() => setSnoozeModalOpen(true)}
+                  onClick={() => {
+                    setDetailModalOpen(false);
+                    setSnoozeModalOpen(true);
+                  }}
                   style={{ borderRadius: 8, fontWeight: 700 }}
                 >
                   Snooze
@@ -388,7 +391,10 @@ export const Dashboard: React.FC = () => {
               )}
               <Button
                 icon={<EditOutlined />}
-                onClick={() => setEditModalOpen(true)}
+                onClick={() => {
+                  setDetailModalOpen(false);
+                  setEditModalOpen(true);
+                }}
                 style={{ borderRadius: 8, fontWeight: 700 }}
               >
                 Edit
