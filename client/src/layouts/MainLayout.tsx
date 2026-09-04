@@ -106,11 +106,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <CheckSquareOutlined />
             </div>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 18, color: isDark ? '#f8fafc' : '#0f172a', lineHeight: 1.2 }}>
-                Sonam
+              <div style={{ fontWeight: 800, fontSize: 16, color: isDark ? '#f8fafc' : '#0f172a', lineHeight: 1.2 }}>
+                Personal Manager
               </div>
               <div style={{ fontSize: 11, fontWeight: 600, color: isDark ? '#9ca3af' : '#64748b' }}>
-                AI Personal Todo
+                Todo & Reminders
               </div>
             </div>
           </div>
@@ -150,8 +150,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {isMobile && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => navigate('/tasks')}>
-                <CheckSquareOutlined style={{ fontSize: 24, color: redPrimary }} />
-                <span style={{ fontWeight: 800, fontSize: 18, color: isDark ? '#f8fafc' : '#0f172a' }}>Sonam AI Todo</span>
+                <CheckSquareOutlined style={{ fontSize: 22, color: redPrimary }} />
+                <span style={{ fontWeight: 800, fontSize: 16, color: isDark ? '#f8fafc' : '#0f172a' }}>Personal Manager</span>
               </div>
             )}
             {!isMobile && (

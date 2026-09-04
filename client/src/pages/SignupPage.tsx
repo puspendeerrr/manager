@@ -91,7 +91,7 @@ export const SignupPage: React.FC = () => {
             Create your account
           </Title>
           <Text type="secondary" style={{ fontSize: 14, marginTop: 4, display: 'block' }}>
-            Get started with Sonam Todo & Reminders
+            Get started with Personal Manager
           </Text>
         </div>
 

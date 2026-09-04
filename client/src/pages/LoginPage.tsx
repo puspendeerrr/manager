@@ -81,7 +81,7 @@ export const LoginPage: React.FC = () => {
             Welcome back
           </Title>
           <Text type="secondary" style={{ fontSize: 14, marginTop: 4, display: 'block' }}>
-            Login to your Sonam Todo & Reminders
+            Login to your Personal Manager
           </Text>
         </div>
 

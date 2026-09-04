@@ -1,226 +1,156 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Typography, Input, Button, Card, Tag, Alert, Spin, Avatar, message as antMessage } from 'antd';
-import { RobotOutlined, SendOutlined, UserOutlined, ThunderboltOutlined } from '@ant-design/icons';
-import { ActionCard } from '../components/ActionCard';
-import { VoiceInput } from '../components/VoiceInput';
-import { aiService } from '../services/aiService';
-import { AiChatMessage } from '@sonam/shared';
+import React from 'react';
+import { Typography, Card, Tag, Button, Space } from 'antd';
+import {
+  RobotOutlined,
+  ClockCircleOutlined,
+  ThunderboltOutlined,
+  AudioOutlined,
+  ArrowLeftOutlined,
+  CheckSquareOutlined,
+} from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
 const { Title, Text } = Typography;
 
 export const SonamPage: React.FC = () => {
+  const navigate = useNavigate();
   const { mode } = useTheme();
   const isDark = mode === 'dark';
   const redPrimary = isDark ? '#ef4444' : '#dc2626';
 
-  const [messages, setMessages] = useState<AiChatMessage[]>([
-    {
-      id: 'init_1',
-      sender: 'sonam',
-      text: "Good day! I'm Sonam, your Personal AI Work & Todo Assistant. You can type or speak to ask me anything across your tasks, Google Calendar, Gmail, and reminders!",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    },
-  ]);
-
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [isAiConfigured, setIsAiConfigured] = useState(true);
-
-  const chatEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, loading]);
-
-  const handleSendMessage = async (customText?: string) => {
-    const queryText = customText || input.trim();
-    if (!queryText || loading) return;
-
-    const userMsg: AiChatMessage = {
-      id: `msg_user_${Date.now()}`,
-      sender: 'user',
-      text: queryText,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    if (!customText) setInput('');
-    setLoading(true);
-
-    try {
-      const res = await aiService.sendChatMessage({ message: queryText });
-      setIsAiConfigured(res.isAiConfigured);
-
-      const sonamMsg: AiChatMessage = {
-        id: `msg_sonam_${Date.now()}`,
-        sender: 'sonam',
-        text: res.message,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        actionCard: res.actionCard || null,
-      };
-
-      setMessages((prev) => [...prev, sonamMsg]);
-    } catch (err: any) {
-      antMessage.error(err.message || 'Failed to communicate with Sonam AI');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVoiceTranscript = (transcript: string) => {
-    if (transcript.trim()) {
-      handleSendMessage(transcript.trim());
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
   return (
-    <div style={{ maxWidth: 850, margin: '0 auto', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
-      {/* Header Title */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <Title level={2} style={{ color: isDark ? '#f8fafc' : '#0f172a', fontWeight: 800, margin: 0 }}>
-              Ask Sonam
-            </Title>
-            <Text style={{ color: isDark ? '#9ca3af' : '#64748b', fontSize: 14 }}>
-              Your Personal AI Todo & Reminder Assistant
-            </Text>
-          </div>
-          <Tag color="red" icon={<ThunderboltOutlined />} style={{ fontWeight: 700, borderRadius: 8, padding: '4px 10px' }}>
-            AI Assistant Active
-          </Tag>
-        </div>
-      </div>
-
-      {!isAiConfigured && (
-        <Alert
-          type="warning"
-          message="GEMINI_API_KEY Missing"
-          description="Sonam is currently using offline fallback responses. Add GEMINI_API_KEY to server/.env to enable full live Gemini AI capabilities!"
-          showIcon
-          style={{ marginBottom: 16, borderRadius: 12 }}
-        />
-      )}
-
-      {/* Chat Messages Container */}
-      <Card
+    <div style={{ maxWidth: 720, margin: '40px auto 60px auto', textAlign: 'center', padding: '0 16px' }}>
+      {/* Coming Soon Tag */}
+      <Tag
+        color="volcano"
+        icon={<ClockCircleOutlined />}
         style={{
-          flex: 1,
-          borderRadius: 16,
-          borderColor: isDark ? '#27272a' : '#e2e8f0',
-          background: isDark ? '#18181b' : '#ffffff',
-          display: 'flex',
-          flexDirection: 'column',
+          fontSize: 13,
+          fontWeight: 800,
+          borderRadius: 20,
+          padding: '6px 16px',
+          letterSpacing: 1.5,
+          textTransform: 'uppercase',
           marginBottom: 20,
-        }}
-        bodyStyle={{
-          padding: '20px',
-          overflowY: 'auto',
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
+          border: 'none',
+          boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)',
         }}
       >
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            style={{
-              display: 'flex',
-              flexDirection: msg.sender === 'user' ? 'row-reverse' : 'row',
-              gap: 12,
-              alignItems: 'flex-start',
-            }}
-          >
-            <Avatar
-              icon={msg.sender === 'user' ? <UserOutlined /> : <RobotOutlined />}
-              style={{
-                background: msg.sender === 'user' ? redPrimary : isDark ? '#3f3f46' : '#64748b',
-                flexShrink: 0,
-              }}
-            />
+        Coming Soon
+      </Tag>
 
-            <div style={{ maxWidth: '80%' }}>
-              <div
-                style={{
-                  background: msg.sender === 'user' ? redPrimary : isDark ? '#27272a' : '#f1f5f9',
-                  color: msg.sender === 'user' ? '#ffffff' : isDark ? '#f8fafc' : '#0f172a',
-                  padding: '12px 16px',
-                  borderRadius: msg.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  whiteSpace: 'pre-wrap',
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-                }}
-              >
-                {msg.text}
-              </div>
-
-              {msg.actionCard && (
-                <ActionCard action={msg.actionCard} onActionComplete={() => handleSendMessage('Action completed!')} />
-              )}
-
-              <div style={{ fontSize: 11, color: isDark ? '#6b7280' : '#94a3b8', marginTop: 4, textAlign: msg.sender === 'user' ? 'right' : 'left' }}>
-                {msg.timestamp}
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {loading && (
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <Avatar icon={<RobotOutlined />} style={{ background: redPrimary }} />
-            <div style={{ background: isDark ? '#27272a' : '#f1f5f9', padding: '10px 16px', borderRadius: 16 }}>
-              <Spin size="small" tip="Sonam is processing..." />
-            </div>
-          </div>
-        )}
-
-        <div ref={chatEndRef} />
-      </Card>
-
-      {/* Quick Input Toolbar with Voice Component */}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-        <VoiceInput onTranscript={handleVoiceTranscript} disabled={loading} />
-
-        <Input
-          placeholder="Ask Sonam or speak... (e.g. 'Kal mera schedule kya hai?')"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          size="large"
-          style={{ borderRadius: 12, background: isDark ? '#18181b' : '#ffffff', color: isDark ? '#f8fafc' : '#0f172a' }}
-        />
-
-        <Button
-          type="primary"
-          icon={<SendOutlined />}
-          size="large"
-          loading={loading}
-          onClick={() => handleSendMessage()}
-          style={{
-            background: redPrimary,
-            border: 'none',
-            borderRadius: 12,
-            fontWeight: 700,
-            padding: '0 24px',
-          }}
-        >
-          Send
-        </Button>
+      {/* Main Icon */}
+      <div
+        style={{
+          width: 80,
+          height: 80,
+          borderRadius: 24,
+          background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 auto 24px auto',
+          color: 'white',
+          fontSize: 40,
+          boxShadow: '0 12px 30px rgba(239, 68, 68, 0.35)',
+        }}
+      >
+        <RobotOutlined />
       </div>
+
+      <Title level={2} style={{ color: isDark ? '#f8fafc' : '#0f172a', fontWeight: 800, marginBottom: 12 }}>
+        Ask Sonam (AI Assistant)
+      </Title>
+
+      <Text
+        style={{
+          color: isDark ? '#9ca3af' : '#64748b',
+          fontSize: 16,
+          display: 'block',
+          maxWidth: 580,
+          margin: '0 auto 36px auto',
+          lineHeight: 1.6,
+        }}
+      >
+        We're building an intelligent AI assistant. Soon you'll be able to create, reschedule, snooze, and converse with your Personal Manager using natural voice and chat commands!
+      </Text>
+
+      {/* Feature Teasers */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 36, textAlign: 'left' }}>
+        <Card
+          style={{
+            background: isDark ? '#18181b' : '#ffffff',
+            borderRadius: 16,
+            borderColor: isDark ? '#27272a' : '#e2e8f0',
+            boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.03)',
+          }}
+          bodyStyle={{ padding: '20px' }}
+        >
+          <AudioOutlined style={{ fontSize: 24, color: redPrimary, marginBottom: 10 }} />
+          <Text style={{ fontWeight: 800, fontSize: 15, display: 'block', color: isDark ? '#f8fafc' : '#0f172a', marginBottom: 4 }}>
+            Voice Task Creation
+          </Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Simply speak to schedule tasks & set repeating reminders automatically.
+          </Text>
+        </Card>
+
+        <Card
+          style={{
+            background: isDark ? '#18181b' : '#ffffff',
+            borderRadius: 16,
+            borderColor: isDark ? '#27272a' : '#e2e8f0',
+            boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.03)',
+          }}
+          bodyStyle={{ padding: '20px' }}
+        >
+          <ThunderboltOutlined style={{ fontSize: 24, color: redPrimary, marginBottom: 10 }} />
+          <Text style={{ fontWeight: 800, fontSize: 15, display: 'block', color: isDark ? '#f8fafc' : '#0f172a', marginBottom: 4 }}>
+            Natural Language Parsing
+          </Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Understands phrases like "Kal 5 PM ko Aman ko call reminder lagao".
+          </Text>
+        </Card>
+
+        <Card
+          style={{
+            background: isDark ? '#18181b' : '#ffffff',
+            borderRadius: 16,
+            borderColor: isDark ? '#27272a' : '#e2e8f0',
+            boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(0,0,0,0.03)',
+          }}
+          bodyStyle={{ padding: '20px' }}
+        >
+          <CheckSquareOutlined style={{ fontSize: 24, color: '#10b981', marginBottom: 10 }} />
+          <Text style={{ fontWeight: 800, fontSize: 15, display: 'block', color: isDark ? '#f8fafc' : '#0f172a', marginBottom: 4 }}>
+            Smart Reminders Engine
+          </Text>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Seamlessly integrated with your primary Personal Manager schedule.
+          </Text>
+        </Card>
+      </div>
+
+      {/* Return Button */}
+      <Button
+        type="primary"
+        icon={<ArrowLeftOutlined />}
+        size="large"
+        onClick={() => navigate('/tasks')}
+        style={{
+          background: redPrimary,
+          border: 'none',
+          borderRadius: 12,
+          fontWeight: 700,
+          padding: '0 28px',
+          height: 48,
+          fontSize: 15,
+        }}
+      >
+        Go to Tasks
+      </Button>
     </div>
   );
 };
