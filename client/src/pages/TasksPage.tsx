@@ -34,6 +34,7 @@ export const TasksPage: React.FC = () => {
   // Active Reminder Alert state
   const [dueTaskAlert, setDueTaskAlert] = useState<Task | null>(null);
   const [reminderModalOpen, setReminderModalOpen] = useState(false);
+  const [actionLoadingTaskId, setActionLoadingTaskId] = useState<string | null>(null);
 
   // Schedule Task Modal state (for new task creation and edit)
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
@@ -88,6 +89,7 @@ export const TasksPage: React.FC = () => {
 
   const handleSaveScheduledTask = async (data: { title: string; deadlineIso: string; repeatMins: number }) => {
     try {
+      setSubmitting(true);
       if (editingTask) {
         await taskClientService.updateTask(editingTask.id, {
           title: data.title,
@@ -110,25 +112,31 @@ export const TasksPage: React.FC = () => {
       }
       setScheduleModalOpen(false);
       setNaturalInput('');
-      fetchTasks();
+      await fetchTasks();
     } catch (err: any) {
       antMessage.error(err.message || 'Failed to save task');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleComplete = async (taskId: string) => {
     try {
+      setActionLoadingTaskId(taskId);
       await taskClientService.completeTask(taskId);
       antMessage.success('Task marked COMPLETED!');
       setReminderModalOpen(false);
-      fetchTasks();
+      await fetchTasks();
     } catch (err: any) {
       antMessage.error(err.message || 'Failed to complete task');
+    } finally {
+      setActionLoadingTaskId(null);
     }
   };
 
   const handleSnooze = async (taskId: string, dtoOrMins: SnoozeTaskDTO | number = 10) => {
     try {
+      setActionLoadingTaskId(taskId);
       let payload: SnoozeTaskDTO = { duration: '10m', customMinutes: 10 };
       if (typeof dtoOrMins === 'number') {
         payload = { duration: '10m', customMinutes: dtoOrMins };
@@ -138,36 +146,44 @@ export const TasksPage: React.FC = () => {
       await taskClientService.snoozeTask(taskId, payload);
       antMessage.info('Task reminder snoozed!');
       setReminderModalOpen(false);
-      fetchTasks();
+      await fetchTasks();
     } catch (err: any) {
       antMessage.error(err.message || 'Failed to snooze task');
+    } finally {
+      setActionLoadingTaskId(null);
     }
   };
 
   const handleStopReminders = async (taskId: string) => {
     try {
+      setActionLoadingTaskId(taskId);
       await taskClientService.updateTask(taskId, { keepReminding: false, nextReminderAt: null });
       antMessage.info('Repeating reminders stopped for this task.');
       setReminderModalOpen(false);
-      fetchTasks();
+      await fetchTasks();
     } catch (err: any) {
       antMessage.error(err.message || 'Failed to stop reminders');
+    } finally {
+      setActionLoadingTaskId(null);
     }
   };
 
   const handleDelete = async (taskId: string) => {
     try {
+      setActionLoadingTaskId(taskId);
       await taskClientService.deleteTask(taskId);
       antMessage.success('Task deleted');
-      fetchTasks();
+      await fetchTasks();
     } catch (err: any) {
       const errMsg = err.message || '';
       if (errMsg.includes('not found') || errMsg.includes('404')) {
         antMessage.info('Task deleted');
-        fetchTasks();
+        await fetchTasks();
       } else {
         antMessage.error('Unable to delete task. Please try again.');
       }
+    } finally {
+      setActionLoadingTaskId(null);
     }
   };
 
@@ -256,23 +272,43 @@ export const TasksPage: React.FC = () => {
                 type="primary"
                 icon={<CheckOutlined />}
                 size="small"
+                loading={actionLoadingTaskId === task.id}
                 onClick={() => handleComplete(task.id)}
                 style={{ background: '#10b981', borderColor: '#10b981', borderRadius: 6, fontWeight: 700 }}
               >
                 Done
               </Button>
 
-              <Button icon={<ClockCircleOutlined />} size="small" onClick={() => handleSnooze(task.id, 10)} style={{ borderRadius: 6 }}>
+              <Button
+                icon={<ClockCircleOutlined />}
+                size="small"
+                loading={actionLoadingTaskId === task.id}
+                onClick={() => handleSnooze(task.id, 10)}
+                style={{ borderRadius: 6 }}
+              >
                 Snooze 10m
               </Button>
             </>
           )}
 
-          <Button icon={<EditOutlined />} size="small" onClick={() => handleOpenEdit(task)} style={{ borderRadius: 6 }}>
+          <Button
+            icon={<EditOutlined />}
+            size="small"
+            disabled={actionLoadingTaskId === task.id}
+            onClick={() => handleOpenEdit(task)}
+            style={{ borderRadius: 6 }}
+          >
             Edit
           </Button>
 
-          <Button icon={<DeleteOutlined />} danger size="small" onClick={() => handleDelete(task.id)} style={{ borderRadius: 6 }}>
+          <Button
+            icon={<DeleteOutlined />}
+            danger
+            size="small"
+            loading={actionLoadingTaskId === task.id}
+            onClick={() => handleDelete(task.id)}
+            style={{ borderRadius: 6 }}
+          >
             Delete
           </Button>
         </div>

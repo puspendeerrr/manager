@@ -12,7 +12,7 @@ interface ScheduleTaskModalProps {
   initialDateIso?: string | null;
   initialTimeStr?: string | null;
   repeatMins?: number;
-  onSave: (data: { title: string; deadlineIso: string; repeatMins: number }) => void;
+  onSave: (data: { title: string; deadlineIso: string; repeatMins: number }) => Promise<void> | void;
   onCancel: () => void;
 }
 
@@ -33,6 +33,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
   const [selectedTime, setSelectedTime] = useState<Dayjs | null>(null);
   const [selectedRepeatMins, setSelectedRepeatMins] = useState(repeatMins);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -40,10 +41,11 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
       setSelectedDate(initialDateIso ? dayjs(initialDateIso) : dayjs());
       setSelectedTime(initialTimeStr ? dayjs(initialTimeStr, 'HH:mm') : null);
       setSelectedRepeatMins(repeatMins);
+      setSaving(false);
     }
   }, [open, initialTitle, initialDateIso, initialTimeStr, repeatMins]);
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     if (!title.trim()) {
       message.error('Please enter a task title.');
       return;
@@ -65,11 +67,16 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
       .second(0)
       .millisecond(0);
 
-    onSave({
-      title: title.trim(),
-      deadlineIso: combined.toISOString(),
-      repeatMins: selectedRepeatMins,
-    });
+    try {
+      setSaving(true);
+      await onSave({
+        title: title.trim(),
+        deadlineIso: combined.toISOString(),
+        repeatMins: selectedRepeatMins,
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const labelStyle = { fontWeight: 700, color: isDark ? '#f8fafc' : '#0f172a' };
@@ -84,7 +91,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
         </div>
       }
       footer={null}
-      onCancel={onCancel}
+      onCancel={saving ? undefined : onCancel}
       centered
       width={460}
       style={{ borderRadius: 16 }}
@@ -98,6 +105,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Call Aman regarding SIH..."
             size="large"
+            disabled={saving}
             style={{ borderRadius: 10 }}
           />
         </Form.Item>
@@ -110,6 +118,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
               onChange={(date) => setSelectedDate(date)}
               format="MMM D, YYYY"
               size="large"
+              disabled={saving}
               style={{ width: '100%', borderRadius: 10 }}
               allowClear={false}
             />
@@ -122,6 +131,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
               format="h:mm A"
               use12Hours
               size="large"
+              disabled={saving}
               placeholder="Select Time"
               style={{ width: '100%', borderRadius: 10 }}
             />
@@ -134,6 +144,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
             value={selectedRepeatMins}
             onChange={setSelectedRepeatMins}
             size="large"
+            disabled={saving}
             style={{ width: '100%', borderRadius: 10 }}
             suffixIcon={<BellOutlined style={{ color: redPrimary }} />}
           >
@@ -146,14 +157,15 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
 
         {/* Modal Buttons */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
-          <Button onClick={onCancel} size="large" style={{ borderRadius: 10, fontWeight: 600 }}>
+          <Button onClick={onCancel} size="large" disabled={saving} style={{ borderRadius: 10, fontWeight: 600 }}>
             Cancel
           </Button>
 
           <Button
             type="primary"
             htmlType="submit"
-            icon={<CheckOutlined />}
+            loading={saving}
+            icon={!saving ? <CheckOutlined /> : undefined}
             size="large"
             style={{
               background: redPrimary,
@@ -163,7 +175,7 @@ export const ScheduleTaskModal: React.FC<ScheduleTaskModalProps> = ({
               padding: '0 24px',
             }}
           >
-            Save Task
+            {saving ? 'Saving Task...' : 'Save Task'}
           </Button>
         </div>
       </Form>
