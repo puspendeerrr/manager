@@ -3,7 +3,24 @@ import { prisma } from '../utils/prisma';
 import dayjs from 'dayjs';
 
 export class TaskService {
+  async ensureUserExists(userId: string) {
+    try {
+      await prisma.user.upsert({
+        where: { id: userId },
+        update: {},
+        create: {
+          id: userId,
+          email: `${userId}@sonam.app`,
+          name: 'Sonam User',
+        },
+      });
+    } catch (err) {
+      console.warn(`[taskService] ensureUserExists warning for ${userId}:`, err);
+    }
+  }
+
   async getTasks(userId: string, filters?: { status?: any; priority?: any; search?: string; projectId?: string }) {
+    await this.ensureUserExists(userId);
     const whereClause: any = { userId };
 
     if (filters?.status) whereClause.status = filters.status;
@@ -31,6 +48,7 @@ export class TaskService {
   }
 
   async createTask(userId: string, data: CreateTaskDTO) {
+    await this.ensureUserExists(userId);
     const deadlineDate = data.deadline ? new Date(data.deadline) : null;
     const nextReminderDate = data.nextReminderAt ? new Date(data.nextReminderAt) : deadlineDate;
 
