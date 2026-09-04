@@ -127,10 +127,16 @@ export const TasksPage: React.FC = () => {
     }
   };
 
-  const handleSnooze = async (taskId: string, mins: number = 10) => {
+  const handleSnooze = async (taskId: string, dtoOrMins: SnoozeTaskDTO | number = 10) => {
     try {
-      await taskClientService.snoozeTask(taskId, { duration: '10m', customMinutes: mins });
-      antMessage.info(`Remind scheduled in ${mins} minutes!`);
+      let payload: SnoozeTaskDTO = { duration: '10m', customMinutes: 10 };
+      if (typeof dtoOrMins === 'number') {
+        payload = { duration: '10m', customMinutes: dtoOrMins };
+      } else {
+        payload = dtoOrMins;
+      }
+      await taskClientService.snoozeTask(taskId, payload);
+      antMessage.info('Task reminder snoozed!');
       setReminderModalOpen(false);
       fetchTasks();
     } catch (err: any) {
@@ -155,7 +161,13 @@ export const TasksPage: React.FC = () => {
       antMessage.success('Task deleted');
       fetchTasks();
     } catch (err: any) {
-      antMessage.error(err.message || 'Failed to delete task');
+      const errMsg = err.message || '';
+      if (errMsg.includes('not found') || errMsg.includes('404')) {
+        antMessage.info('Task deleted');
+        fetchTasks();
+      } else {
+        antMessage.error('Unable to delete task. Please try again.');
+      }
     }
   };
 
@@ -206,8 +218,8 @@ export const TasksPage: React.FC = () => {
       }}
       bodyStyle={{ padding: '16px 20px' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ flex: 1, marginRight: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div>
           <Text
             style={{
               fontSize: 16,
@@ -215,12 +227,13 @@ export const TasksPage: React.FC = () => {
               color: task.status === TaskStatus.COMPLETED ? (isDark ? '#6b7280' : '#94a3b8') : isDark ? '#f8fafc' : '#0f172a',
               textDecoration: task.status === TaskStatus.COMPLETED ? 'line-through' : 'none',
               display: 'block',
+              marginBottom: 4,
             }}
           >
             {task.title}
           </Text>
 
-          <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             {task.deadline && (
               <Tag color={dayjs(task.deadline).isBefore(now) && task.status !== TaskStatus.COMPLETED ? 'red' : 'blue'}>
                 Due: {dayjs(task.deadline).format('MMM D, h:mm A')}
@@ -230,13 +243,13 @@ export const TasksPage: React.FC = () => {
             {task.priority === 'HIGH' || task.priority === 'URGENT' ? <Tag color="volcano">HIGH</Tag> : null}
             {task.nextReminderAt && task.status !== TaskStatus.COMPLETED && (
               <Text type="secondary" style={{ fontSize: 12, color: isDark ? '#9ca3af' : '#64748b' }}>
-                <ClockCircleOutlined style={{ marginRight: 4, color: redPrimary }} /> Repeats every 30m
+                <ClockCircleOutlined style={{ marginRight: 4, color: redPrimary }} /> Repeats every {task.repeatReminderMins || 30}m
               </Text>
             )}
           </div>
         </div>
 
-        <Space size="small">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {task.status !== TaskStatus.COMPLETED && (
             <>
               <Button
@@ -255,10 +268,14 @@ export const TasksPage: React.FC = () => {
             </>
           )}
 
-          <Button icon={<EditOutlined />} size="small" onClick={() => handleOpenEdit(task)} style={{ borderRadius: 6 }} />
+          <Button icon={<EditOutlined />} size="small" onClick={() => handleOpenEdit(task)} style={{ borderRadius: 6 }}>
+            Edit
+          </Button>
 
-          <Button icon={<DeleteOutlined />} danger size="small" onClick={() => handleDelete(task.id)} style={{ borderRadius: 6 }} />
-        </Space>
+          <Button icon={<DeleteOutlined />} danger size="small" onClick={() => handleDelete(task.id)} style={{ borderRadius: 6 }}>
+            Delete
+          </Button>
+        </div>
       </div>
     </Card>
   );

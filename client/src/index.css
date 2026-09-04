@@ -170,3 +170,26 @@ body {
 [data-theme='dark'] .ant-empty-description {
   color: #9ca3af !important;
 }
+
+[data-theme='dark'] .ant-picker-dropdown .ant-picker-panel-container,
+[data-theme='dark'] .ant-select-dropdown,
+[data-theme='dark'] .ant-dropdown-menu {
+  background-color: #18181b !important;
+  color: #f8fafc !important;
+  border: 1px solid #27272a !important;
+}
+
+[data-theme='dark'] .ant-picker-cell-in-view {
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .ant-picker-header,
+[data-theme='dark'] .ant-picker-content th {
+  color: #f8fafc !important;
+}
+
+[data-theme='dark'] .ant-notification-notice {
+  background-color: #18181b !important;
+  border: 1px solid #27272a !important;
+  color: #f8fafc !important;
+}

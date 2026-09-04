@@ -273,9 +273,9 @@ export const Dashboard: React.FC = () => {
         <ScheduleTaskModal
           open={editModalOpen}
           initialTitle={selectedTask.title}
-          initialDateStr={selectedTask.deadline ? dayjs(selectedTask.deadline).format('YYYY-MM-DD') : null}
+          initialDateIso={selectedTask.deadline || null}
           initialTimeStr={selectedTask.deadline ? dayjs(selectedTask.deadline).format('HH:mm') : null}
-          initialRepeatMins={selectedTask.repeatReminderMins || 30}
+          repeatMins={selectedTask.repeatReminderMins || 30}
           onCancel={() => setEditModalOpen(false)}
           onSave={handleSaveEdit}
         />
@@ -287,19 +287,19 @@ export const Dashboard: React.FC = () => {
           open={snoozeModalOpen}
           task={selectedTask}
           onClose={() => setSnoozeModalOpen(false)}
-          onComplete={async () => {
+          onDone={async () => {
             await handleComplete(selectedTask.id);
             setSnoozeModalOpen(false);
           }}
-          onSnooze={async (mins) => {
-            await taskService.snoozeTask(selectedTask.id, { snoozeMinutes: mins });
+          onSnooze={async (taskId, mins) => {
+            await taskService.snoozeTask(taskId, { duration: '10m', customMinutes: mins });
             antMessage.info(`Task snoozed for ${mins} minutes`);
             setSnoozeModalOpen(false);
             setDetailModalOpen(false);
             fetchTasks();
           }}
-          onStopReminders={async () => {
-            await taskService.updateTask(selectedTask.id, { keepReminding: false });
+          onStopReminders={async (taskId) => {
+            await taskService.updateTask(taskId, { keepReminding: false, nextReminderAt: null });
             antMessage.info('Reminders stopped for this task');
             setSnoozeModalOpen(false);
             setDetailModalOpen(false);

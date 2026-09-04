@@ -7,9 +7,10 @@ function getUserId(req: AuthenticatedRequest): string {
   if (req.user && req.user.id) {
     return req.user.id;
   }
-  const headerId = req.headers['x-user-id'] as string;
-  if (headerId) return headerId;
-  return 'user_dev_01';
+  const err: any = new Error('Authentication required');
+  err.statusCode = 401;
+  err.code = 'UNAUTHORIZED';
+  throw err;
 }
 
 export async function getTasks(req: AuthenticatedRequest, res: Response, next: NextFunction) {
@@ -37,7 +38,7 @@ export async function getTaskById(req: AuthenticatedRequest, res: Response, next
 
     const task = await taskService.getTaskById(id, userId);
     if (!task) {
-      return sendError(res, 'Task not found or access denied', 404, 'NOT_FOUND');
+      return sendError(res, 'Task not found', 404, 'NOT_FOUND');
     }
 
     return sendSuccess(res, task);
@@ -86,6 +87,18 @@ export async function completeTask(req: AuthenticatedRequest, res: Response, nex
     const { id } = req.params;
 
     const task = await taskService.completeTask(id, userId);
+    return sendSuccess(res, task);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function stopReminders(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const userId = getUserId(req);
+    const { id } = req.params;
+
+    const task = await taskService.stopReminders(id, userId);
     return sendSuccess(res, task);
   } catch (err) {
     return next(err);

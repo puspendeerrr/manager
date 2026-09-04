@@ -6,6 +6,7 @@ import {
   updateTask,
   deleteTask,
   completeTask,
+  stopReminders,
   snoozeTask,
   rescheduleTask,
 } from '../controllers/taskController';
@@ -30,6 +31,7 @@ router.patch('/:id', validateRequest(updateTaskSchema), updateTask);
 router.delete('/:id', deleteTask);
 
 router.post('/:id/complete', completeTask);
+router.post('/:id/stop-reminders', stopReminders);
 router.post('/:id/snooze', validateRequest(snoozeTaskSchema), snoozeTask);
 router.post('/:id/reschedule', validateRequest(rescheduleTaskSchema), rescheduleTask);
 

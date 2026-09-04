@@ -72,7 +72,12 @@ export class TaskService {
 
   async updateTask(taskId: string, userId: string, data: UpdateTaskDTO) {
     const existing = await this.getTaskById(taskId, userId);
-    if (!existing) throw new Error('Task not found or access denied');
+    if (!existing) {
+      const err: any = new Error('Task not found');
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      throw err;
+    }
 
     return prisma.task.update({
       where: { id: taskId },
@@ -92,14 +97,39 @@ export class TaskService {
 
   async completeTask(taskId: string, userId: string) {
     const existing = await this.getTaskById(taskId, userId);
-    if (!existing) throw new Error('Task not found or access denied');
+    if (!existing) {
+      const err: any = new Error('Task not found');
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      throw err;
+    }
 
     return prisma.task.update({
       where: { id: taskId },
       data: {
         status: TaskStatus.COMPLETED,
         completedAt: new Date(),
+        keepReminding: false,
         nextReminderAt: null, // STOP REMINDERS
+      },
+      include: { project: true },
+    });
+  }
+
+  async stopReminders(taskId: string, userId: string) {
+    const existing = await this.getTaskById(taskId, userId);
+    if (!existing) {
+      const err: any = new Error('Task not found');
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      throw err;
+    }
+
+    return prisma.task.update({
+      where: { id: taskId },
+      data: {
+        keepReminding: false,
+        nextReminderAt: null,
       },
       include: { project: true },
     });
@@ -107,7 +137,12 @@ export class TaskService {
 
   async rescheduleTask(taskId: string, userId: string, newDeadlineIso: string) {
     const existing = await this.getTaskById(taskId, userId);
-    if (!existing) throw new Error('Task not found or access denied');
+    if (!existing) {
+      const err: any = new Error('Task not found');
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      throw err;
+    }
 
     const newDate = new Date(newDeadlineIso);
     return prisma.task.update({
@@ -123,10 +158,16 @@ export class TaskService {
 
   async snoozeTask(taskId: string, userId: string, snoozeDto: SnoozeTaskDTO) {
     const existing = await this.getTaskById(taskId, userId);
-    if (!existing) throw new Error('Task not found or access denied');
+    if (!existing) {
+      const err: any = new Error('Task not found');
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      throw err;
+    }
 
     let snoozeMinutes = 10;
-    if (snoozeDto.duration === '15m') snoozeMinutes = 15;
+    if (snoozeDto.duration === '10m') snoozeMinutes = 10;
+    else if (snoozeDto.duration === '15m') snoozeMinutes = 15;
     else if (snoozeDto.duration === '30m') snoozeMinutes = 30;
     else if (snoozeDto.duration === '1h') snoozeMinutes = 60;
     else if (snoozeDto.duration === 'tomorrow') snoozeMinutes = 1440;
@@ -162,7 +203,17 @@ export class TaskService {
 
   async deleteTask(taskId: string, userId: string) {
     const existing = await this.getTaskById(taskId, userId);
-    if (!existing) throw new Error('Task not found or access denied');
+    if (!existing) {
+      const err: any = new Error('Task not found');
+      err.statusCode = 404;
+      err.code = 'NOT_FOUND';
+      throw err;
+    }
+
+    // Delete dependent records first to satisfy foreign key constraints
+    await prisma.taskReminder.deleteMany({
+      where: { taskId },
+    });
 
     return prisma.task.delete({ where: { id: taskId } });
   }

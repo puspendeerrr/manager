@@ -21,7 +21,7 @@ export const updateTaskSchema = z.object({
 });
 
 export const snoozeTaskSchema = z.object({
-  duration: z.enum(['15m', '30m', '1h', '2h', 'tomorrow', 'custom']),
+  duration: z.enum(['10m', '15m', '30m', '1h', '2h', 'tomorrow', 'custom']),
   customMinutes: z.number().min(1).optional(),
 });
 
