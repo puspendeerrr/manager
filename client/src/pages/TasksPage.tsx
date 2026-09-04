@@ -76,21 +76,14 @@ export const TasksPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleNaturalSubmit = async () => {
-    if (!naturalInput.trim()) return;
-    try {
-      setSubmitting(true);
-      const res = await aiClientService.parseTask(naturalInput);
-      setPendingCleanTitle(res.cleanedTitle || naturalInput);
-      setPendingSuggestedDate(res.suggestedDateIso || dayjs().format('YYYY-MM-DD'));
-      setPendingSuggestedTime(res.suggestedTimeStr || null);
-      setEditingTask(null);
-      setScheduleModalOpen(true);
-    } catch (err: any) {
-      antMessage.error(err.message || 'Failed to parse task input');
-    } finally {
-      setSubmitting(false);
-    }
+  const handleNaturalSubmit = () => {
+    const titleText = naturalInput.trim();
+    if (!titleText) return;
+    setPendingCleanTitle(titleText);
+    setPendingSuggestedDate(dayjs().format('YYYY-MM-DD'));
+    setPendingSuggestedTime(null);
+    setEditingTask(null);
+    setScheduleModalOpen(true);
   };
 
   const handleSaveScheduledTask = async (data: { title: string; deadlineIso: string; repeatMins: number }) => {
