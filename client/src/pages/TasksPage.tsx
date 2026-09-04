@@ -45,9 +45,9 @@ export const TasksPage: React.FC = () => {
   const [pendingSuggestedTime, setPendingSuggestedTime] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       setErrorMsg(null);
       const list = await taskClientService.getTasks();
       setTasks(list);
@@ -66,15 +66,17 @@ export const TasksPage: React.FC = () => {
         setReminderModalOpen(true);
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Sonam server is waking up or unavailable. Please retry in a moment.');
+      if (isInitial) {
+        setErrorMsg(err.message || 'Sonam server is waking up or unavailable. Please retry in a moment.');
+      }
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTasks();
-    const interval = setInterval(fetchTasks, 15000);
+    fetchTasks(true);
+    const interval = setInterval(() => fetchTasks(false), 15000);
     return () => clearInterval(interval);
   }, []);
 

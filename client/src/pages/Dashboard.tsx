@@ -47,20 +47,22 @@ export const Dashboard: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const fetchTasks = useCallback(async () => {
+  const fetchTasks = useCallback(async (isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       const list = await taskService.getTasks();
       setTasks(list);
     } catch (err: any) {
-      antMessage.error(err.message || 'Failed to load scheduled tasks');
+      if (isInitial) {
+        antMessage.error(err.message || 'Failed to load scheduled tasks');
+      }
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchTasks();
+    fetchTasks(true);
   }, [fetchTasks]);
 
   const handleComplete = async (taskId: string) => {
