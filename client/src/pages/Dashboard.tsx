@@ -29,12 +29,22 @@ export const Dashboard: React.FC = () => {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs>(dayjs());
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [actionLoadingTaskId, setActionLoadingTaskId] = useState<string | null>(null);
 
   // Edit / Snooze modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -54,23 +64,29 @@ export const Dashboard: React.FC = () => {
 
   const handleComplete = async (taskId: string) => {
     try {
+      setActionLoadingTaskId(taskId);
       await taskService.completeTask(taskId);
       antMessage.success('Task marked completed!');
       setDetailModalOpen(false);
-      fetchTasks();
+      await fetchTasks();
     } catch (err: any) {
       antMessage.error(err.message || 'Failed to complete task');
+    } finally {
+      setActionLoadingTaskId(null);
     }
   };
 
   const handleDelete = async (taskId: string) => {
     try {
+      setActionLoadingTaskId(taskId);
       await taskService.deleteTask(taskId);
       antMessage.success('Task deleted');
       setDetailModalOpen(false);
-      fetchTasks();
+      await fetchTasks();
     } catch (err: any) {
       antMessage.error(err.message || 'Failed to delete task');
+    } finally {
+      setActionLoadingTaskId(null);
     }
   };
 
@@ -86,7 +102,7 @@ export const Dashboard: React.FC = () => {
       antMessage.success('Task updated!');
       setEditModalOpen(false);
       setDetailModalOpen(false);
-      fetchTasks();
+      await fetchTasks();
     } catch (err: any) {
       antMessage.error(err.message || 'Failed to update task');
     }
@@ -99,6 +115,16 @@ export const Dashboard: React.FC = () => {
     );
 
     if (dayTasks.length === 0) return null;
+
+    if (isMobile) {
+      return (
+        <div style={{ textAlign: 'center', marginTop: 2 }}>
+          <Tag color="red" style={{ borderRadius: 99, padding: '0 4px', fontSize: 10, lineHeight: '14px', margin: 0 }}>
+            {dayTasks.length}
+          </Tag>
+        </div>
+      );
+    }
 
     return (
       <div style={{ marginTop: 4 }}>
@@ -137,61 +163,170 @@ export const Dashboard: React.FC = () => {
     );
   };
 
+  const selectedDateStr = selectedDate.format('YYYY-MM-DD');
+  const selectedDayTasks = tasks.filter(
+    (t) => t.deadline && dayjs(t.deadline).format('YYYY-MM-DD') === selectedDateStr
+  );
+
   return (
-    <div>
-      {/* Top Calendar Header Banner */}
-      <Card
+    <div style={{ maxWidth: 900, margin: '0 auto', paddingBottom: 40 }}>
+      {/* Top Header Banner */}
+      <div
         style={{
           background: isDark ? '#18181b' : '#ffffff',
           borderRadius: 16,
-          marginBottom: 24,
+          padding: isMobile ? '16px' : '20px 24px',
+          marginBottom: 20,
           border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 12,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <Title level={3} style={{ color: isDark ? '#f8fafc' : '#0f172a', margin: 0, fontWeight: 800 }}>
-              <CalendarOutlined style={{ color: redPrimary, marginRight: 10 }} />
-              Task Calendar
-            </Title>
-            <Text type="secondary" style={{ fontSize: 14 }}>
-              View-only schedule of your personal todo tasks & persistent reminders.
-            </Text>
-          </div>
-
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            size="large"
-            onClick={() => navigate('/tasks')}
-            style={{
-              background: redPrimary,
-              border: 'none',
-              borderRadius: 10,
-              fontWeight: 700,
-            }}
-          >
-            Go to Tasks to Add Task
-          </Button>
+        <div>
+          <Title level={isMobile ? 4 : 3} style={{ color: isDark ? '#f8fafc' : '#0f172a', margin: 0, fontWeight: 800 }}>
+            <CalendarOutlined style={{ color: redPrimary, marginRight: 8 }} />
+            Task Calendar
+          </Title>
+          <Text type="secondary" style={{ fontSize: isMobile ? 12 : 14 }}>
+            View-only schedule of your tasks & reminders.
+          </Text>
         </div>
-      </Card>
 
-      {/* Calendar Grid View */}
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          size={isMobile ? 'middle' : 'large'}
+          onClick={() => navigate('/tasks')}
+          style={{
+            background: redPrimary,
+            border: 'none',
+            borderRadius: 10,
+            fontWeight: 700,
+          }}
+        >
+          Add Task
+        </Button>
+      </div>
+
+      {/* Calendar Grid / Card View */}
       <Card
         style={{
           background: isDark ? '#18181b' : '#ffffff',
           borderRadius: 16,
           border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}`,
+          marginBottom: 24,
         }}
+        bodyStyle={{ padding: isMobile ? '12px' : '20px' }}
       >
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0' }}>
-            <Spin size="large" tip="Loading calendar tasks..." />
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <Spin size="large" tip="Loading calendar..." />
           </div>
         ) : (
-          <AntCalendar cellRender={dateCellRender} />
+          <AntCalendar
+            fullscreen={!isMobile}
+            value={selectedDate}
+            onSelect={(val) => setSelectedDate(val)}
+            cellRender={dateCellRender}
+          />
         )}
       </Card>
+
+      {/* Selected Date Agenda Section */}
+      <div style={{ marginTop: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Title level={4} style={{ color: isDark ? '#f8fafc' : '#0f172a', fontWeight: 800, margin: 0 }}>
+            Agenda for {selectedDate.format('MMM D, YYYY')} ({selectedDayTasks.length})
+          </Title>
+        </div>
+
+        {selectedDayTasks.length === 0 ? (
+          <Card
+            style={{
+              background: isDark ? '#18181b' : '#ffffff',
+              borderRadius: 14,
+              border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}`,
+              textAlign: 'center',
+              padding: '24px 16px',
+            }}
+          >
+            <Text type="secondary" style={{ fontSize: 14 }}>
+              No tasks scheduled for {selectedDate.format('MMM D')}.
+            </Text>
+          </Card>
+        ) : (
+          selectedDayTasks.map((t) => (
+            <Card
+              key={t.id}
+              style={{
+                borderRadius: 14,
+                marginBottom: 12,
+                background: isDark ? '#18181b' : '#ffffff',
+                border: `1px solid ${isDark ? '#27272a' : '#e2e8f0'}`,
+              }}
+              bodyStyle={{ padding: '16px 20px' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: 700,
+                      color: t.status === TaskStatus.COMPLETED ? (isDark ? '#6b7280' : '#94a3b8') : isDark ? '#f8fafc' : '#0f172a',
+                      textDecoration: t.status === TaskStatus.COMPLETED ? 'line-through' : 'none',
+                    }}
+                  >
+                    {t.title}
+                  </Text>
+                  <Tag color={t.status === TaskStatus.COMPLETED ? 'green' : 'red'}>
+                    {dayjs(t.deadline).format('h:mm A')}
+                  </Tag>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  {t.status !== TaskStatus.COMPLETED && (
+                    <Button
+                      type="primary"
+                      icon={<CheckOutlined />}
+                      size="small"
+                      loading={actionLoadingTaskId === t.id}
+                      onClick={() => handleComplete(t.id)}
+                      style={{ background: '#10b981', borderColor: '#10b981', borderRadius: 6, fontWeight: 700 }}
+                    >
+                      Done
+                    </Button>
+                  )}
+                  <Button
+                    icon={<EditOutlined />}
+                    size="small"
+                    disabled={actionLoadingTaskId === t.id}
+                    onClick={() => {
+                      setSelectedTask(t);
+                      setEditModalOpen(true);
+                    }}
+                    style={{ borderRadius: 6 }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    icon={<DeleteOutlined />}
+                    danger
+                    size="small"
+                    loading={actionLoadingTaskId === t.id}
+                    onClick={() => handleDelete(t.id)}
+                    style={{ borderRadius: 6 }}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
 
       {/* Task Details Modal */}
       {selectedTask && (

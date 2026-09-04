@@ -193,3 +193,24 @@ body {
   border: 1px solid #27272a !important;
   color: #f8fafc !important;
 }
+
+/* Mobile Calendar Overrides for Sleek Display */
+@media (max-width: 768px) {
+  .ant-picker-calendar {
+    background: transparent !important;
+  }
+  .ant-picker-calendar .ant-picker-panel {
+    background: transparent !important;
+    border: none !important;
+  }
+  .ant-picker-calendar-date-content {
+    height: auto !important;
+    min-height: 20px !important;
+  }
+  .ant-picker-calendar-full .ant-picker-cell-inner {
+    min-height: 44px !important;
+  }
+  .ant-picker-calendar-header {
+    padding: 8px 4px !important;
+  }
+}
