@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
+import https from 'https';
 
 dotenv.config();
 
@@ -90,6 +91,18 @@ cron.schedule('* * * * *', async () => {
     }
   } catch (err) {
     console.error('[ServerCron] Error processing due reminders:', err);
+  }
+});
+
+// Keep-Alive Self-Ping Cron (runs every 10 minutes to keep Render free-tier instance active)
+cron.schedule('*/10 * * * *', () => {
+  const backendUrl = process.env.RENDER_EXTERNAL_URL || 'https://manager-yse.onrender.com';
+  if (backendUrl.startsWith('https://')) {
+    https.get(`${backendUrl}/health`, (res) => {
+      console.log(`[KeepAliveCron] Self-ping sent to ${backendUrl}/health - Status: ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.warn(`[KeepAliveCron] Self-ping error: ${err.message}`);
+    });
   }
 });
 
